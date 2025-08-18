@@ -53,14 +53,13 @@ const SenseiSection = () => {
                 Kyokushin Karate
               </Badge>
               <Badge variant="secondary" className="bg-dojo-red/10 text-dojo-red hover:bg-dojo-red/20">
-                5+ Years Teaching
+                Experienced Instructor
               </Badge>
             </div>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               Sensei Mohammad Jomaa is a dedicated martial artist with a <strong>Black Belt 1st Dan</strong> in 
-              Kyokushin Karate and over <strong>5 years of teaching experience</strong>. He is passionate about 
-              guiding students in martial arts and life discipline.
+              Kyokushin Karate. He is passionate about guiding students in martial arts and life discipline.
             </p>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
@@ -72,10 +71,10 @@ const SenseiSection = () => {
             <div className="grid sm:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="w-12 h-12 bg-dojo-red/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Clock className="w-6 h-6 text-dojo-red" />
+                  <Award className="w-6 h-6 text-dojo-red" />
                 </div>
-                <div className="text-2xl font-bold text-dojo-red">5+</div>
-                <div className="text-sm text-muted-foreground">Years Teaching</div>
+                <div className="text-2xl font-bold text-dojo-red">1st Dan</div>
+                <div className="text-sm text-muted-foreground">Black Belt</div>
               </div>
               
               <div className="text-center">

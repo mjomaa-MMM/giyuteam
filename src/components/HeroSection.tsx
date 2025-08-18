@@ -62,10 +62,6 @@ const HeroSection = () => {
           
           <div className="mt-12 flex items-center gap-8 text-white">
             <div>
-              <div className="text-2xl font-bold text-dojo-red">5+</div>
-              <div className="text-sm text-gray-300">Years Experience</div>
-            </div>
-            <div>
               <div className="text-2xl font-bold text-dojo-red">1st Dan</div>
               <div className="text-sm text-gray-300">Black Belt</div>
             </div>
