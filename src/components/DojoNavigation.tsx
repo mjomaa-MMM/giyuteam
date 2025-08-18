@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
-import logoImage from "@/assets/giyu-team-logo.png";
 
 const DojoNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
