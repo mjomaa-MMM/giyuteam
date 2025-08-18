@@ -20,12 +20,8 @@ const DojoNavigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <img 
-              src={logoImage} 
-              alt="Giyu Team Logo" 
-              className="h-12 w-auto"
-            />
-            <span className="text-lg text-dojo-black ml-3 font-medium">By Jomaa</span>
+            <span className="text-xl font-bold text-dojo-red">Giyu Team</span>
+            <span className="text-lg text-dojo-black ml-2 font-medium">By Jomaa</span>
           </div>
 
           {/* Desktop Navigation */}
