@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
+import logoImage from "@/assets/giyu-team-logo.png";
 
 const DojoNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,8 +20,12 @@ const DojoNavigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-dojo-red">Giyu Team</h1>
-            <span className="text-lg text-dojo-black ml-2">By Jomaa</span>
+            <img 
+              src={logoImage} 
+              alt="Giyu Team Logo" 
+              className="h-12 w-auto"
+            />
+            <span className="text-lg text-dojo-black ml-3 font-medium">By Jomaa</span>
           </div>
 
           {/* Desktop Navigation */}

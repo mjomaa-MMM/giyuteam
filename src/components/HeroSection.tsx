@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Star } from "lucide-react";
-import heroImage from "@/assets/hero-karate.jpg";
+import heroImage from "@/assets/karate-team-header.jpg";
 
 const HeroSection = () => {
   return (
@@ -9,7 +9,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 z-0">
         <img 
           src={heroImage} 
-          alt="Karate practitioner performing kata" 
+          alt="Karate team performing synchronized kata" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-dojo-black/80 via-dojo-black/60 to-transparent"></div>
