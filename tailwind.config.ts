@@ -52,6 +52,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				dojo: {
+					red: 'hsl(var(--dojo-red))',
+					'red-dark': 'hsl(var(--dojo-red-dark))',
+					'red-light': 'hsl(var(--dojo-red-light))',
+					black: 'hsl(var(--dojo-black))',
+					'black-light': 'hsl(var(--dojo-black-light))',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

@@ -18,6 +18,9 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        dojo: "bg-gradient-to-r from-dojo-red to-dojo-red-dark text-white hover:from-dojo-red-dark hover:to-dojo-black transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl font-bold",
+        whatsapp: "bg-green-600 text-white hover:bg-green-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl font-bold",
+        "outline-dojo": "border-2 border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white transition-all duration-300 font-bold",
       },
       size: {
         default: "h-10 px-4 py-2",
