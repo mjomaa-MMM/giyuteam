@@ -3,13 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { 
   CreditCard, 
   Smartphone, 
   Send, 
-  CheckCircle, 
-  DollarSign,
+  CheckCircle,
   AlertCircle
 } from "lucide-react";
 import { useState } from "react";
@@ -64,13 +62,6 @@ const PaymentSection = () => {
     });
   };
 
-  const services = [
-    { name: "Monthly Membership", price: "50,000 LBP" },
-    { name: "Private Training Session", price: "25,000 LBP" },
-    { name: "Group Class Drop-in", price: "15,000 LBP" },
-    { name: "Equipment Purchase", price: "Varies" },
-    { name: "Tournament Registration", price: "20,000 LBP" },
-  ];
 
   return (
     <section id="payment" className="py-20 bg-gradient-to-b from-muted to-background">
@@ -134,30 +125,6 @@ const PaymentSection = () => {
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Services & Pricing */}
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <DollarSign className="w-6 h-6 text-dojo-red" />
-                  Services & Pricing
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {services.map((service, index) => (
-                    <div key={index} className="flex justify-between items-center py-2">
-                      <span className="text-foreground">{service.name}</span>
-                      <span className="font-semibold text-dojo-red">{service.price}</span>
-                    </div>
-                  ))}
-                </div>
-                <Separator className="my-4" />
-                <p className="text-sm text-muted-foreground">
-                  All prices are in Lebanese Pounds (LBP). Contact us for package deals and discounts.
-                </p>
               </CardContent>
             </Card>
           </div>
