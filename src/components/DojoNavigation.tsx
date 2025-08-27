@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import LanguageToggle from "./LanguageToggle";
 
 const DojoNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -25,41 +28,42 @@ const DojoNavigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            <LanguageToggle />
             <button 
               onClick={() => scrollToSection('home')}
               className="text-foreground hover:text-dojo-red transition-colors font-medium"
             >
-              Home
+              {t('nav.home')}
             </button>
             <button 
               onClick={() => scrollToSection('about')}
               className="text-foreground hover:text-dojo-red transition-colors font-medium"
             >
-              About Us
+              {t('nav.about')}
             </button>
             <button 
               onClick={() => scrollToSection('sensei')}
               className="text-foreground hover:text-dojo-red transition-colors font-medium"
             >
-              Sensei
+              {t('nav.sensei')}
             </button>
             <button 
               onClick={() => scrollToSection('classes')}
               className="text-foreground hover:text-dojo-red transition-colors font-medium"
             >
-              Classes
+              {t('nav.classes')}
             </button>
             <button 
               onClick={() => scrollToSection('payment')}
               className="text-foreground hover:text-dojo-red transition-colors font-medium"
             >
-              Payment
+              {t('nav.payment')}
             </button>
             <button 
               onClick={() => scrollToSection('contact')}
               className="text-foreground hover:text-dojo-red transition-colors font-medium"
             >
-              Contact
+              {t('nav.contact')}
             </button>
             <Button 
               variant="whatsapp" 
@@ -67,7 +71,7 @@ const DojoNavigation = () => {
               onClick={() => window.open('https://wa.me/96170520091', '_blank')}
             >
               <MessageCircle className="w-4 h-4" />
-              Register Now
+              {t('nav.register')}
             </Button>
           </div>
 
@@ -87,41 +91,44 @@ const DojoNavigation = () => {
         {isOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t border-border">
+              <div className="px-3 py-2">
+                <LanguageToggle />
+              </div>
               <button 
                 onClick={() => scrollToSection('home')}
                 className="block w-full text-left px-3 py-2 text-foreground hover:text-dojo-red transition-colors font-medium"
               >
-                Home
+                {t('nav.home')}
               </button>
               <button 
                 onClick={() => scrollToSection('about')}
                 className="block w-full text-left px-3 py-2 text-foreground hover:text-dojo-red transition-colors font-medium"
               >
-                About Us
+                {t('nav.about')}
               </button>
               <button 
                 onClick={() => scrollToSection('sensei')}
                 className="block w-full text-left px-3 py-2 text-foreground hover:text-dojo-red transition-colors font-medium"
               >
-                Sensei
+                {t('nav.sensei')}
               </button>
               <button 
                 onClick={() => scrollToSection('classes')}
                 className="block w-full text-left px-3 py-2 text-foreground hover:text-dojo-red transition-colors font-medium"
               >
-                Classes
+                {t('nav.classes')}
               </button>
               <button 
                 onClick={() => scrollToSection('payment')}
                 className="block w-full text-left px-3 py-2 text-foreground hover:text-dojo-red transition-colors font-medium"
               >
-                Payment
+                {t('nav.payment')}
               </button>
               <button 
                 onClick={() => scrollToSection('contact')}
                 className="block w-full text-left px-3 py-2 text-foreground hover:text-dojo-red transition-colors font-medium"
               >
-                Contact
+                {t('nav.contact')}
               </button>
               <div className="px-3 py-2">
                 <Button 
@@ -131,7 +138,7 @@ const DojoNavigation = () => {
                   onClick={() => window.open('https://wa.me/96170520091', '_blank')}
                 >
                   <MessageCircle className="w-4 h-4" />
-                  Register Now
+                  {t('nav.register')}
                 </Button>
               </div>
             </div>
