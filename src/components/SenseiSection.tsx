@@ -1,18 +1,21 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Award, Clock, Users2, Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import senseiImage from "@/assets/sensei-portrait.jpg";
 
 const SenseiSection = () => {
+  const { t } = useTranslation();
+
   return (
     <section id="sensei" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Meet Our <span className="text-dojo-red">Sensei</span>
+            {t('sensei.title')}
           </h2>
           <p className="text-xl text-muted-foreground">
-            Expert guidance with passion and dedication
+            {t('sensei.guidance')}
           </p>
         </div>
 
@@ -33,7 +36,7 @@ const SenseiSection = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-center gap-2">
                     <Award className="w-5 h-5 text-dojo-red" />
-                    <span className="font-bold text-dojo-black">Black Belt 1st Dan</span>
+                    <span className="font-bold text-dojo-black">{t('sensei.rank')}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -42,12 +45,12 @@ const SenseiSection = () => {
 
           <div className="lg:pl-8">
             <h3 className="text-3xl font-bold text-foreground mb-4">
-              Sensei Mohammad Jomaa
+              {t('sensei.name')}
             </h3>
             
             <div className="flex flex-wrap gap-2 mb-6">
               <Badge variant="secondary" className="bg-dojo-red/10 text-dojo-red hover:bg-dojo-red/20">
-                Black Belt 1st Dan
+                {t('sensei.rank')}
               </Badge>
               <Badge variant="secondary" className="bg-dojo-red/10 text-dojo-red hover:bg-dojo-red/20">
                 Kyokushin Karate
@@ -58,14 +61,7 @@ const SenseiSection = () => {
             </div>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              Sensei Mohammad Jomaa is a dedicated martial artist with a <strong>Black Belt 1st Dan</strong> in 
-              Kyokushin Karate. He is passionate about guiding students in martial arts and life discipline.
-            </p>
-
-            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              With personalized guidance, Sensei Jomaa ensures that every student grows in skill, confidence, 
-              and spirit. His commitment to excellence and traditional values makes him an inspiring teacher 
-              for students of all ages and skill levels.
+              {t('sensei.description')}
             </p>
 
             <div className="grid sm:grid-cols-3 gap-6">
@@ -74,14 +70,14 @@ const SenseiSection = () => {
                   <Award className="w-6 h-6 text-dojo-red" />
                 </div>
                 <div className="text-2xl font-bold text-dojo-red">1st Dan</div>
-                <div className="text-sm text-muted-foreground">Black Belt</div>
+                <div className="text-sm text-muted-foreground">{t('hero.blackBelt')}</div>
               </div>
               
               <div className="text-center">
                 <div className="w-12 h-12 bg-dojo-red/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Users2 className="w-6 h-6 text-dojo-red" />
                 </div>
-                <div className="text-2xl font-bold text-dojo-red">All Ages</div>
+                <div className="text-2xl font-bold text-dojo-red">{t('sensei.allAgesTeaching')}</div>
                 <div className="text-sm text-muted-foreground">Students Welcome</div>
               </div>
               
@@ -89,8 +85,8 @@ const SenseiSection = () => {
                 <div className="w-12 h-12 bg-dojo-red/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Star className="w-6 h-6 text-dojo-red" />
                 </div>
-                <div className="text-2xl font-bold text-dojo-red">Expert</div>
-                <div className="text-sm text-muted-foreground">Guidance</div>
+                <div className="text-2xl font-bold text-dojo-red">{t('sensei.guidance')}</div>
+                <div className="text-sm text-muted-foreground">Expert</div>
               </div>
             </div>
           </div>

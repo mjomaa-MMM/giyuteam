@@ -1,28 +1,31 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Target, Heart, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import dojoImage from "@/assets/dojo-interior.jpg";
 
 const AboutSection = () => {
+  const { t } = useTranslation();
+  
   const values = [
     {
       icon: Shield,
-      title: "Discipline",
-      description: "Building self-control and mental strength through traditional martial arts training."
+      title: t('about.discipline'),
+      description: t('about.disciplineDesc')
     },
     {
       icon: Target,
-      title: "Focus",
-      description: "Developing concentration and determination to achieve personal goals."
+      title: t('about.excellence'),
+      description: t('about.excellenceDesc')
     },
     {
       icon: Heart,
-      title: "Respect",
-      description: "Honoring the traditions of Kyokushin Karate and respecting others."
+      title: t('about.respect'),
+      description: t('about.respectDesc')
     },
     {
       icon: Users,
-      title: "Community",
-      description: "Creating a supportive environment where everyone can grow together."
+      title: t('about.community'),
+      description: t('about.communityDesc')
     }
   ];
 
@@ -31,28 +34,24 @@ const AboutSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            About <span className="text-dojo-red">Giyu Team By Jomaa</span>
+            {t('about.title')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            More than just a sport – it's a way of life
+            {t('about.subtitle')}
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           <div>
-            <h3 className="text-2xl font-bold text-foreground mb-6">Our Mission</h3>
+            <h3 className="text-2xl font-bold text-foreground mb-6">{t('about.title')}</h3>
             <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-              At <strong>Giyu Team By Jomaa</strong>, we believe that karate is more than just a sport – 
-              it is a way of life. Our dojo provides a space where students learn self-defense, respect, 
-              discipline, and perseverance.
+              {t('about.mission')}
             </p>
             <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-              Whether you are looking to improve fitness, gain self-confidence, or train for competition, 
-              we welcome everyone from beginners to advanced practitioners.
+              {t('about.classes')}
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Located in <strong>Houmin al Fawka, Nabatiyeh, Lebanon</strong>, our dojo offers both 
-              private and group classes for children, teens, and adults.
+              {t('about.location')}
             </p>
           </div>
           

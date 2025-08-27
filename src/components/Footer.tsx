@@ -1,7 +1,10 @@
 import { MessageCircle, Facebook, Instagram, Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-dojo-black text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -9,31 +12,30 @@ const Footer = () => {
           {/* Dojo Info */}
           <div>
             <h3 className="text-2xl font-bold mb-4">
-              <span className="text-dojo-red">Giyu Team</span> By Jomaa
+              {t('footer.dojo')}
             </h3>
             <p className="text-gray-300 mb-4 leading-relaxed">
-              Building strength, discipline, and respect through the practice of Kyokushin Karate. 
-              Join us in your martial arts journey.
+              {t('footer.description')}
             </p>
             <Button 
               variant="whatsapp" 
               onClick={() => window.open('https://wa.me/96170520091', '_blank')}
             >
               <MessageCircle className="w-4 h-4" />
-              Register Now
+              {t('nav.register')}
             </Button>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-dojo-red">Quick Links</h4>
+            <h4 className="text-lg font-semibold mb-4 text-dojo-red">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2">
               <li>
                 <button 
                   onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Home
+                  {t('nav.home')}
                 </button>
               </li>
               <li>
@@ -41,7 +43,7 @@ const Footer = () => {
                   onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  About Us
+                  {t('nav.about')}
                 </button>
               </li>
               <li>
@@ -49,7 +51,7 @@ const Footer = () => {
                   onClick={() => document.getElementById('sensei')?.scrollIntoView({ behavior: 'smooth' })}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  About Sensei
+                  {t('footer.aboutSensei')}
                 </button>
               </li>
               <li>
@@ -57,7 +59,7 @@ const Footer = () => {
                   onClick={() => document.getElementById('classes')?.scrollIntoView({ behavior: 'smooth' })}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Classes
+                  {t('nav.classes')}
                 </button>
               </li>
               <li>
@@ -65,7 +67,7 @@ const Footer = () => {
                   onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Contact
+                  {t('nav.contact')}
                 </button>
               </li>
             </ul>
@@ -73,7 +75,7 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-dojo-red">Contact Info</h4>
+            <h4 className="text-lg font-semibold mb-4 text-dojo-red">{t('footer.contactInfo')}</h4>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-dojo-red" />
@@ -90,7 +92,7 @@ const Footer = () => {
             </div>
             
             <div className="mt-6">
-              <h5 className="text-sm font-semibold mb-3 text-dojo-red">Follow Us</h5>
+              <h5 className="text-sm font-semibold mb-3 text-dojo-red">{t('footer.followUs')}</h5>
               <div className="flex gap-3">
                 <Button
                   variant="ghost"
@@ -115,7 +117,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-700 mt-8 pt-8 text-center">
           <p className="text-gray-300">
-            © 2024 Giyu Team By Jomaa. All rights reserved. | Kyokushin Karate Dojo - Houmin al Fawka, Nabatiyeh, Lebanon
+            {t('footer.copyright')}
           </p>
         </div>
       </div>

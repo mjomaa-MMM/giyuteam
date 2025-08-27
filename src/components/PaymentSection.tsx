@@ -11,9 +11,11 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 
 const PaymentSection = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [paymentData, setPaymentData] = useState({
     name: '',
@@ -67,10 +69,10 @@ const PaymentSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Easy <span className="text-dojo-red">Payments</span>
+            {t('payment.title')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Pay for classes and services conveniently using Whish Money
+            {t('payment.subtitle')}
           </p>
         </div>
 
@@ -81,7 +83,7 @@ const PaymentSection = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-dojo-red">
                   <Smartphone className="w-6 h-6" />
-                  Pay with Whish Money
+                  {t('payment.instructions')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">

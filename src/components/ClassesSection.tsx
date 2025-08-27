@@ -2,13 +2,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Users, User, MessageCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const ClassesSection = () => {
+  const { t } = useTranslation();
+  
   const privateClasses = {
-    title: "Private Training Sessions",
+    title: t('classes.private.title'),
     days: "Monday - Thursday",
-    description: "One-on-one personalized training sessions",
-    features: ["Personalized attention", "All skill levels welcome", "Flexible scheduling", "Custom training program"],
+    description: t('classes.private.description'),
+    features: [
+      t('classes.private.personalized'),
+      t('classes.private.flexible'),
+      t('classes.private.focused'),
+      t('classes.private.rapid')
+    ],
     icon: User,
     color: "bg-dojo-red"
   };
@@ -16,25 +24,25 @@ const ClassesSection = () => {
   const groupClasses = [
     {
       time: "4:00 PM - 5:00 PM",
-      group: "Girls (5-10 years old)",
+      group: t('classes.group.kids'),
       day: "Friday & Saturday",
       color: "bg-pink-500"
     },
     {
       time: "5:00 PM - 6:00 PM", 
-      group: "Boys (5-10 years old)",
+      group: t('classes.group.kids'),
       day: "Friday & Saturday",
       color: "bg-blue-500"
     },
     {
       time: "6:00 PM - 7:15 PM",
-      group: "Boys (10-18 years old)",
+      group: t('classes.group.teens'),
       day: "Friday & Saturday", 
       color: "bg-green-500"
     },
     {
       time: "7:15 PM - 9:00 PM",
-      group: "Men (18+ years old)",
+      group: t('classes.group.adults'),
       day: "Friday & Saturday",
       color: "bg-dojo-red"
     }
@@ -45,10 +53,10 @@ const ClassesSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Training <span className="text-dojo-red">Schedule</span>
+            {t('classes.title')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Choose between personalized private sessions or dynamic group classes
+            {t('classes.subtitle')}
           </p>
         </div>
 
@@ -84,7 +92,7 @@ const ClassesSection = () => {
                   onClick={() => window.open('https://wa.me/96170520091', '_blank')}
                 >
                   <MessageCircle className="w-4 h-4" />
-                  Book Private Session
+                  {t('classes.private.book')}
                 </Button>
                 <p className="text-sm text-muted-foreground flex items-center">
                   <Clock className="w-4 h-4 mr-2" />
@@ -98,7 +106,7 @@ const ClassesSection = () => {
         {/* Group Classes */}
         <div>
           <h3 className="text-2xl font-bold text-foreground mb-8 text-center">
-            Group Classes - <span className="text-dojo-red">Friday & Saturday</span>
+            {t('classes.group.title')} - <span className="text-dojo-red">Friday & Saturday</span>
           </h3>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -137,7 +145,7 @@ const ClassesSection = () => {
               onClick={() => window.open('https://wa.me/96170520091', '_blank')}
             >
               <MessageCircle className="w-5 h-5" />
-              Register for Group Classes
+              {t('classes.group.register')}
             </Button>
             <p className="text-sm text-muted-foreground mt-3">
               Contact us to confirm availability and start your martial arts journey

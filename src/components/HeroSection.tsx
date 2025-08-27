@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import heroImage from "@/assets/karate-team-header.jpg";
 
 const HeroSection = () => {
+  const { t } = useTranslation();
+
   return (
     <section id="home" className="relative min-h-screen flex items-center">
       {/* Background Image */}
@@ -26,18 +29,15 @@ const HeroSection = () => {
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-            <span className="text-dojo-red">Giyu Team</span><br />
-            By Jomaa
+            {t('hero.title')}
           </h1>
           
           <p className="text-xl sm:text-2xl text-gray-200 mb-4 font-medium">
-            Strength. Discipline. Respect.
+            {t('hero.subtitle')}
           </p>
           
           <p className="text-lg text-gray-300 mb-8 leading-relaxed max-w-2xl">
-            Welcome to Giyu Team By Jomaa, a martial arts dojo dedicated to building strength, 
-            discipline, and respect through the practice of Kyokushin Karate. Develop confidence, 
-            physical fitness, and mental resilience in a safe and motivating environment.
+            {t('hero.description')}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4">
@@ -48,7 +48,7 @@ const HeroSection = () => {
               className="text-lg px-8 py-6"
             >
               <MessageCircle className="w-5 h-5" />
-              Register Now
+              {t('nav.register')}
             </Button>
             <Button 
               variant="outline-dojo" 
@@ -56,17 +56,17 @@ const HeroSection = () => {
               onClick={() => document.getElementById('classes')?.scrollIntoView({ behavior: 'smooth' })}
               className="text-lg px-8 py-6 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white hover:text-dojo-black"
             >
-              View Classes
+              {t('hero.viewClasses')}
             </Button>
           </div>
           
           <div className="mt-12 flex items-center gap-8 text-white">
             <div>
               <div className="text-2xl font-bold text-dojo-red">1st Dan</div>
-              <div className="text-sm text-gray-300">Black Belt</div>
+              <div className="text-sm text-gray-300">{t('hero.blackBelt')}</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-dojo-red">All Ages</div>
+              <div className="text-2xl font-bold text-dojo-red">{t('hero.allAges')}</div>
               <div className="text-sm text-gray-300">Welcome</div>
             </div>
           </div>

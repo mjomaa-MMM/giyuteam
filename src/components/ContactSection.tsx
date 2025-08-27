@@ -5,9 +5,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Phone, Mail, MapPin, MessageCircle, Facebook, Instagram } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 
 const ContactSection = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
@@ -77,17 +79,17 @@ const ContactSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Get in <span className="text-dojo-red">Touch</span>
+            {t('contact.title')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Ready to start your martial arts journey? Contact us today!
+            {t('contact.subtitle')}
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Contact Information */}
           <div>
-            <h3 className="text-2xl font-bold text-foreground mb-8">Contact Information</h3>
+            <h3 className="text-2xl font-bold text-foreground mb-8">{t('contact.info')}</h3>
             
             <div className="space-y-6 mb-8">
               {contactInfo.map((info, index) => (
@@ -148,7 +150,7 @@ const ContactSection = () => {
           <div>
             <Card className="border-border/50">
               <CardHeader>
-                <CardTitle className="text-2xl text-foreground">Send us a Message</CardTitle>
+                <CardTitle className="text-2xl text-foreground">{t('contact.form.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
