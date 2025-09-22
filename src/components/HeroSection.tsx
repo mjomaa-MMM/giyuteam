@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import heroImage from "@/assets/karate-team-header.jpg";
+import heroImage from "@/assets/hero-kyokushin.jpg";
 
 const HeroSection = () => {
   const { t } = useTranslation();
