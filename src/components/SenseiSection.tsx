@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Award, Clock, Users2, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import senseiImage from "@/assets/sensei-portrait.jpg";
+import senseiImage from "@/assets/sensei-new-portrait.jpg";
 
 const SenseiSection = () => {
   const { t } = useTranslation();
