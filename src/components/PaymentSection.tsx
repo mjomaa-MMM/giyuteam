@@ -8,7 +8,9 @@ import {
   Smartphone, 
   Send, 
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  ExternalLink,
+  Loader2
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,6 +28,88 @@ const PaymentSection = () => {
     service: '',
     notes: ''
   });
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState('');
+
+  // WHIsh Money API Configuration
+  const WHISH_API_BASE = 'https://whish.money/itel-service/api';
+  const WHISH_HEADERS = {
+    'Content-Type': 'application/json',
+    'channel': 'web', // This would be provided by WHIsh
+    'secret': 'your-secret-key', // This would be provided by WHIsh
+    'websiteurl': window.location.origin
+  };
+
+  const generatePaymentLink = async () => {
+    if (!paymentData.amount || !paymentData.service) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter the amount and service before generating payment link.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    
+    try {
+      const response = await fetch(`${WHISH_API_BASE}/payment/collect`, {
+        method: 'POST',
+        headers: WHISH_HEADERS,
+        body: JSON.stringify({
+          amount: parseFloat(paymentData.amount),
+          currency: 'LBP',
+          invoice: `${paymentData.service} - ${paymentData.name}`,
+          externalld: Date.now(), // Unique transaction ID
+          successCallbackUrl: `${window.location.origin}/payment-success`,
+          failureCallbackUrl: `${window.location.origin}/payment-failure`,
+          successRedirectUrl: `${window.location.origin}/?payment=success`,
+          failureRedirectUrl: `${window.location.origin}/?payment=failed`
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.status && result.data?.collectUrl) {
+        setPaymentUrl(result.data.collectUrl);
+        window.open(result.data.collectUrl, '_blank');
+        toast({
+          title: "Payment Link Generated",
+          description: "Opening WHIsh Money payment page in a new tab.",
+        });
+      } else {
+        throw new Error(result.dialog?.message || 'Failed to generate payment link');
+      }
+    } catch (error) {
+      console.error('Payment link generation failed:', error);
+      toast({
+        title: "Payment Link Failed",
+        description: "Unable to generate payment link. Please try manual payment method.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  const openWhishApp = () => {
+    // Try to open WHIsh app with deep link, fallback to download page
+    const whishAppLink = 'whish://pay'; // Assumed deep link scheme
+    const downloadLink = 'https://whish.money/download/';
+    
+    // Try to open the app
+    window.location.href = whishAppLink;
+    
+    // Fallback to download page after a short delay if app doesn't open
+    setTimeout(() => {
+      window.open(downloadLink, '_blank');
+    }, 1000);
+    
+    toast({
+      title: "Opening WHIsh App",
+      description: "If the app doesn't open, you'll be redirected to download it.",
+    });
+  };
 
   const handlePaymentNotification = (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,15 +171,45 @@ const PaymentSection = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Quick Payment Buttons */}
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Button 
+                    onClick={generatePaymentLink}
+                    disabled={isProcessingPayment || !paymentData.amount || !paymentData.service}
+                    variant="dojo" 
+                    className="w-full"
+                  >
+                    {isProcessingPayment ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Pay Online
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    onClick={openWhishApp}
+                    variant="outline" 
+                    className="w-full border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
+                  >
+                    <Smartphone className="w-4 h-4 mr-2" />
+                    Open WHIsh App
+                    <ExternalLink className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+
                 <div className="bg-background rounded-lg p-4 border border-border/50">
                   <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                     <CreditCard className="w-5 h-5 text-dojo-red" />
                     How to Pay
                   </h4>
                   <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-                    <li>Open your Whish Money app</li>
-                    <li>Select "Send Money" or "Pay Bills"</li>
-                    <li>Send payment to: <strong className="text-foreground">+961-70520091</strong></li>
+                    <li>Choose "Pay Online" for instant payment or "Open WHIsh App" for mobile payment</li>
+                    <li>For app payment: Send money to <strong className="text-foreground">+961-70520091</strong></li>
                     <li>Enter the amount for your selected service</li>
                     <li>Complete the transaction</li>
                     <li>Fill out the notification form below</li>
