@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, User, Home } from 'lucide-react';
+import { LogOut, User, Home, CreditCard } from 'lucide-react';
 
 const UserDashboard = () => {
   const { user, logout } = useAuth();
@@ -113,6 +113,24 @@ const UserDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Subscription Status */}
+        {user.isSubscribed && (
+          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-800">
+                <CreditCard className="h-5 w-5" />
+                Subscription Active
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-green-700">
+                <p><strong>Subscribed on:</strong> {user.subscriptionDate}</p>
+                <p><strong>Next billing date:</strong> {user.nextBillDate}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Welcome Message */}
         <Card className="bg-gradient-to-r from-dojo-red/10 to-dojo-red-light/10 border-dojo-red/20">

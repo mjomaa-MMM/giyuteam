@@ -7,12 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Users, Plus } from 'lucide-react';
+import { LogOut, Users, Plus, CreditCard } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const { user, users, logout, addUser } = useAuth();
+  const { user, users, logout, addUser, toggleSubscription } = useAuth();
   const { toast } = useToast();
 
   // Redirect if not admin
@@ -166,14 +166,33 @@ const AdminDashboard = () => {
                     <div>
                       <p className="font-medium">{userData.username}</p>
                       <p className="text-sm text-muted-foreground">ID: {userData.id}</p>
+                      {userData.isSubscribed && (
+                        <div className="text-xs text-green-600">
+                          <p>Subscribed: {userData.subscriptionDate}</p>
+                          <p>Next bill: {userData.nextBillDate}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <Badge 
-                    variant={userData.role === 'admin' ? 'default' : 'secondary'}
-                    className={userData.role === 'admin' ? 'bg-dojo-red' : ''}
-                  >
-                    {userData.role}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {userData.role !== 'admin' && (
+                      <Button
+                        size="sm"
+                        variant={userData.isSubscribed ? "destructive" : "default"}
+                        className={userData.isSubscribed ? "" : "bg-dojo-red hover:bg-dojo-red-dark"}
+                        onClick={() => toggleSubscription(userData.id)}
+                      >
+                        <CreditCard className="h-4 w-4 mr-1" />
+                        {userData.isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                      </Button>
+                    )}
+                    <Badge 
+                      variant={userData.role === 'admin' ? 'default' : 'secondary'}
+                      className={userData.role === 'admin' ? 'bg-dojo-red' : ''}
+                    >
+                      {userData.role}
+                    </Badge>
+                  </div>
                 </div>
               ))}
               {users.length === 0 && (

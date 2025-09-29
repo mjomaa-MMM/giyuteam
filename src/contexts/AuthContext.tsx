@@ -4,6 +4,9 @@ interface User {
   id: string;
   username: string;
   role: 'admin' | 'user';
+  isSubscribed?: boolean;
+  subscriptionDate?: string;
+  nextBillDate?: string;
 }
 
 interface AuthContextType {
@@ -12,6 +15,7 @@ interface AuthContextType {
   login: (username: string, password: string) => boolean;
   logout: () => void;
   addUser: (username: string, password: string) => boolean;
+  toggleSubscription: (userId: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -102,8 +106,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return true;
   };
 
+  const toggleSubscription = (userId: string) => {
+    setUsers(prev => prev.map(u => {
+      if (u.id === userId) {
+        const now = new Date();
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+        
+        const updatedUser = {
+          ...u,
+          isSubscribed: !u.isSubscribed,
+          subscriptionDate: !u.isSubscribed ? now.toISOString().split('T')[0] : undefined,
+          nextBillDate: !u.isSubscribed ? nextMonth.toISOString().split('T')[0] : undefined
+        };
+        
+        // Update current user if it's the same user
+        if (user && user.id === userId) {
+          setUser(updatedUser);
+          localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        }
+        
+        return updatedUser;
+      }
+      return u;
+    }));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, users, login, logout, addUser }}>
+    <AuthContext.Provider value={{ user, users, login, logout, addUser, toggleSubscription }}>
       {children}
     </AuthContext.Provider>
   );
