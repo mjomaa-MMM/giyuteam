@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { Menu, X, MessageCircle, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import LanguageToggle from "./LanguageToggle";
 
 const DojoNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -72,6 +74,15 @@ const DojoNavigation = () => {
             >
               <MessageCircle className="w-4 h-4" />
               {t('nav.register')}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/welcome')}
+              className="border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
+            >
+              <LogIn className="w-4 h-4" />
+              Login
             </Button>
           </div>
 
@@ -139,6 +150,17 @@ const DojoNavigation = () => {
                 >
                   <MessageCircle className="w-4 h-4" />
                   {t('nav.register')}
+                </Button>
+              </div>
+              <div className="px-3 py-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="w-full border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
+                  onClick={() => navigate('/welcome')}
+                >
+                  <LogIn className="w-4 h-4" />
+                  Login
                 </Button>
               </div>
             </div>
