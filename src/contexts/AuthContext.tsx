@@ -16,6 +16,7 @@ interface AuthContextType {
   logout: () => void;
   addUser: (username: string, password: string) => boolean;
   toggleSubscription: (userId: string) => void;
+  setTestNotification: (userId: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -131,8 +132,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const setTestNotification = (userId: string) => {
+    setUsers(prev => prev.map(u => {
+      if (u.id === userId) {
+        const today = new Date();
+        const testBillDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3);
+        
+        const updatedUser = {
+          ...u,
+          isSubscribed: true,
+          subscriptionDate: u.subscriptionDate || today.toISOString().split('T')[0],
+          nextBillDate: testBillDate.toISOString().split('T')[0]
+        };
+        
+        // Update current user if it's the same user
+        if (user && user.id === userId) {
+          setUser(updatedUser);
+          localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        }
+        
+        return updatedUser;
+      }
+      return u;
+    }));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, users, login, logout, addUser, toggleSubscription }}>
+    <AuthContext.Provider value={{ user, users, login, logout, addUser, toggleSubscription, setTestNotification }}>
       {children}
     </AuthContext.Provider>
   );

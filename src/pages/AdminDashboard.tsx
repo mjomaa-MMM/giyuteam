@@ -7,12 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Users, Plus, CreditCard } from 'lucide-react';
+import { LogOut, Users, Plus, CreditCard, Bell } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const { user, users, logout, addUser, toggleSubscription } = useAuth();
+  const { user, users, logout, addUser, toggleSubscription, setTestNotification } = useAuth();
   const { toast } = useToast();
 
   // Redirect if not admin
@@ -73,6 +73,14 @@ const AdminDashboard = () => {
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out",
+    });
+  };
+
+  const handleTestNotification = (userId: string, username: string) => {
+    setTestNotification(userId);
+    toast({
+      title: "Test Notification Set",
+      description: `User "${username}" will now see subscription expiry notification when they log in.`,
     });
   };
 
@@ -176,15 +184,26 @@ const AdminDashboard = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {userData.role !== 'admin' && (
-                      <Button
-                        size="sm"
-                        variant={userData.isSubscribed ? "destructive" : "default"}
-                        className={userData.isSubscribed ? "" : "bg-dojo-red hover:bg-dojo-red-dark"}
-                        onClick={() => toggleSubscription(userData.id)}
-                      >
-                        <CreditCard className="h-4 w-4 mr-1" />
-                        {userData.isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                          onClick={() => handleTestNotification(userData.id, userData.username)}
+                        >
+                          <Bell className="h-4 w-4 mr-1" />
+                          Test Notification
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={userData.isSubscribed ? "destructive" : "default"}
+                          className={userData.isSubscribed ? "" : "bg-dojo-red hover:bg-dojo-red-dark"}
+                          onClick={() => toggleSubscription(userData.id)}
+                        >
+                          <CreditCard className="h-4 w-4 mr-1" />
+                          {userData.isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                        </Button>
+                      </>
                     )}
                     <Badge 
                       variant={userData.role === 'admin' ? 'default' : 'secondary'}
