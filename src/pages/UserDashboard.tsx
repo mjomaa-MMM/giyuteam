@@ -1,13 +1,32 @@
 import { Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, User, Home, CreditCard } from 'lucide-react';
+import { LogOut, User, Home, CreditCard, AlertTriangle } from 'lucide-react';
 
 const UserDashboard = () => {
   const { user, logout } = useAuth();
   const { toast } = useToast();
+
+  // Check for subscription expiry notification
+  useEffect(() => {
+    if (user?.isSubscribed && user.nextBillDate) {
+      const today = new Date();
+      const billDate = new Date(user.nextBillDate);
+      const diffTime = billDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 3) {
+        toast({
+          title: "Subscription Ending Soon",
+          description: `Your subscription expires in 3 days (${user.nextBillDate}). Please renew to continue access.`,
+          variant: "destructive",
+        });
+      }
+    }
+  }, [user, toast]);
 
   // Redirect if not logged in or is admin
   if (!user) {
