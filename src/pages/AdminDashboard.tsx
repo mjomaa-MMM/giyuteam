@@ -7,12 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Users, Plus, CreditCard, Bell } from 'lucide-react';
+import { LogOut, Users, Plus, CreditCard, Bell, Trash2, Edit } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const { user, users, logout, addUser, toggleSubscription, setTestNotification } = useAuth();
+  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [editUsername, setEditUsername] = useState('');
+  const { user, users, logout, addUser, updateUser, deleteUser, toggleSubscription, setTestNotification } = useAuth();
   const { toast } = useToast();
 
   // Redirect if not admin
@@ -20,7 +22,7 @@ const AdminDashboard = () => {
     return <Navigate to="/welcome" replace />;
   }
 
-  const handleAddUser = (e: React.FormEvent) => {
+  const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!newUsername || !newPassword) {
@@ -50,7 +52,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    const success = addUser(newUsername, newPassword);
+    const success = await addUser(newUsername, newPassword);
     
     if (success) {
       toast({
@@ -76,12 +78,65 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleTestNotification = (userId: string, username: string) => {
-    setTestNotification(userId);
+  const handleTestNotification = async (userId: string, username: string) => {
+    await setTestNotification(userId);
     toast({
       title: "Test Notification Set",
       description: `User "${username}" will now see subscription expiry notification when they log in.`,
     });
+  };
+
+  const handleDeleteUser = async (userId: string, username: string) => {
+    const success = await deleteUser(userId);
+    if (success) {
+      toast({
+        title: "User Deleted",
+        description: `User "${username}" has been deleted successfully`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to delete user",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditUser = (userId: string, currentUsername: string) => {
+    setEditingUser(userId);
+    setEditUsername(currentUsername);
+  };
+
+  const handleUpdateUser = async (userId: string) => {
+    if (!editUsername || editUsername.length < 3) {
+      toast({
+        title: "Error",
+        description: "Username must be at least 3 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const success = await updateUser(userId, { username: editUsername });
+    if (success) {
+      toast({
+        title: "User Updated",
+        description: "Username has been updated successfully",
+      });
+      setEditingUser(null);
+      setEditUsername('');
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to update user or username already exists",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+    setEditUsername('');
   };
 
   return (
@@ -171,37 +226,79 @@ const AdminDashboard = () => {
                     <div className="w-8 h-8 rounded-full bg-dojo-red flex items-center justify-center text-white text-sm font-bold">
                       {userData.username.charAt(0).toUpperCase()}
                     </div>
-                    <div>
-                      <p className="font-medium">{userData.username}</p>
-                      <p className="text-sm text-muted-foreground">ID: {userData.id}</p>
-                      {userData.isSubscribed && (
-                        <div className="text-xs text-green-600">
-                          <p>Subscribed: {userData.subscriptionDate}</p>
-                          <p>Next bill: {userData.nextBillDate}</p>
+                    <div className="flex-1">
+                      {editingUser === userData.user_id ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={editUsername}
+                            onChange={(e) => setEditUsername(e.target.value)}
+                            className="max-w-40"
+                            placeholder="Username"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleUpdateUser(userData.user_id)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleCancelEdit}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="font-medium">{userData.username}</p>
+                          <p className="text-sm text-muted-foreground">ID: {userData.user_id}</p>
+                          {userData.is_subscribed && (
+                            <div className="text-xs text-green-600">
+                              <p>Subscribed: {userData.subscription_date}</p>
+                              <p>Next bill: {userData.next_bill_date}</p>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {userData.role !== 'admin' && (
+                    {userData.role !== 'admin' && editingUser !== userData.user_id && (
                       <>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-orange-600 border-orange-300 hover:bg-orange-50"
-                          onClick={() => handleTestNotification(userData.id, userData.username)}
+                          className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                          onClick={() => handleEditUser(userData.user_id, userData.username)}
                         >
-                          <Bell className="h-4 w-4 mr-1" />
-                          Test Notification
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           size="sm"
-                          variant={userData.isSubscribed ? "destructive" : "default"}
-                          className={userData.isSubscribed ? "" : "bg-dojo-red hover:bg-dojo-red-dark"}
-                          onClick={() => toggleSubscription(userData.id)}
+                          variant="outline"
+                          className="text-red-600 border-red-300 hover:bg-red-50"
+                          onClick={() => handleDeleteUser(userData.user_id, userData.username)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                          onClick={() => handleTestNotification(userData.user_id, userData.username)}
+                        >
+                          <Bell className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={userData.is_subscribed ? "destructive" : "default"}
+                          className={userData.is_subscribed ? "" : "bg-dojo-red hover:bg-dojo-red-dark"}
+                          onClick={() => toggleSubscription(userData.user_id)}
                         >
                           <CreditCard className="h-4 w-4 mr-1" />
-                          {userData.isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                          {userData.is_subscribed ? 'Unsubscribe' : 'Subscribe'}
                         </Button>
                       </>
                     )}

@@ -12,16 +12,16 @@ const UserDashboard = () => {
 
   // Check for subscription expiry notification
   useEffect(() => {
-    if (user?.isSubscribed && user.nextBillDate) {
+    if (user?.is_subscribed && user.next_bill_date) {
       const today = new Date();
-      const billDate = new Date(user.nextBillDate);
+      const billDate = new Date(user.next_bill_date);
       const diffTime = billDate.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
       if (diffDays === 3) {
         toast({
           title: "Subscription Ending Soon",
-          description: `Your subscription expires in 3 days (${user.nextBillDate}). Please renew to continue access.`,
+          description: `Your subscription expires in 3 days (${user.next_bill_date}). Please renew to continue access.`,
           variant: "destructive",
         });
       }
@@ -97,7 +97,7 @@ const UserDashboard = () => {
               <div>
                 <h3 className="text-lg font-semibold">{user.username}</h3>
                 <p className="text-muted-foreground">Role: {user.role}</p>
-                <p className="text-muted-foreground">User ID: {user.id}</p>
+                <p className="text-muted-foreground">User ID: {user.user_id}</p>
               </div>
             </div>
           </CardContent>
@@ -134,7 +134,7 @@ const UserDashboard = () => {
         </Card>
 
         {/* Subscription Status */}
-        {user.isSubscribed && (
+        {user.is_subscribed && (
           <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-800">
@@ -144,8 +144,8 @@ const UserDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-green-700">
-                <p><strong>Subscribed on:</strong> {user.subscriptionDate}</p>
-                <p><strong>Next billing date:</strong> {user.nextBillDate}</p>
+                <p><strong>Subscribed on:</strong> {user.subscription_date}</p>
+                <p><strong>Next billing date:</strong> {user.next_bill_date}</p>
               </div>
             </CardContent>
           </Card>
