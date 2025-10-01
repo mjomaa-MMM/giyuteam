@@ -15,7 +15,7 @@ const Welcome = () => {
 
   // Redirect if already logged in
   if (user) {
-    return <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} replace />;
+    return <Navigate to={user.role === 'admin' ? '/admin/subscribers' : '/home'} replace />;
   }
 
   const handleLogin = (e: React.FormEvent) => {

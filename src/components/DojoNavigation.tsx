@@ -78,7 +78,7 @@ const DojoNavigation = () => {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => navigate('/welcome')}
+              onClick={() => navigate('/')}
               className="border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
             >
               <LogIn className="w-4 h-4" />
@@ -157,7 +157,7 @@ const DojoNavigation = () => {
                   variant="outline" 
                   size="sm"
                   className="w-full border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
-                  onClick={() => navigate('/welcome')}
+                  onClick={() => navigate('/')}
                 >
                   <LogIn className="w-4 h-4" />
                   Login

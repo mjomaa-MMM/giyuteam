@@ -19,7 +19,7 @@ const AdminDashboard = () => {
 
   // Redirect if not admin
   if (!user || user.role !== 'admin') {
-    return <Navigate to="/welcome" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const handleAddUser = async (e: React.FormEvent) => {
@@ -145,7 +145,7 @@ const AdminDashboard = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-dojo-black">Admin Dashboard</h1>
+            <h1 className="text-3xl font-bold text-dojo-black">Subscribers Management</h1>
             <p className="text-muted-foreground">Welcome back, {user.username}</p>
           </div>
           <Button 
