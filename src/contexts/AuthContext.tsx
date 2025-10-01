@@ -47,21 +47,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUsers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: true });
+      const { data, error } = await supabase.functions.invoke('auth-get-users');
 
       if (error) {
         console.error('Error loading users:', error);
         return;
       }
 
-      setUsers((data || []).map(user => ({ ...user, role: user.role as 'admin' | 'user' })));
-      
-      // Create admin user if no users exist
-      if (!data || data.length === 0) {
-        await createDefaultAdmin();
+      if (data?.success && data?.users) {
+        setUsers(data.users.map((user: any) => ({ ...user, role: user.role as 'admin' | 'user' })));
+        
+        // Create admin user if no users exist
+        if (data.users.length === 0) {
+          await createDefaultAdmin();
+        }
       }
     } catch (error) {
       console.error('Error in loadUsers:', error);
@@ -70,32 +69,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const createDefaultAdmin = async () => {
     try {
-      const adminUserId = crypto.randomUUID();
-      
-      // Insert admin profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: adminUserId,
+      const { data, error } = await supabase.functions.invoke('auth-add-user', {
+        body: {
           username: DEFAULT_ADMIN.username,
-          role: DEFAULT_ADMIN.role
-        });
+          password: DEFAULT_ADMIN.password
+        }
+      });
 
-      if (profileError) {
-        console.error('Error creating admin profile:', profileError);
+      if (error) {
+        console.error('Error creating admin:', error);
         return;
       }
 
-      // Insert admin password
-      const { error: passwordError } = await supabase
-        .from('user_passwords')
-        .insert({
-          user_id: adminUserId,
-          password_hash: DEFAULT_ADMIN.password // In production, this should be hashed
-        });
+      if (!data?.success) {
+        console.error('Failed to create admin');
+      }
 
-      if (passwordError) {
-        console.error('Error creating admin password:', passwordError);
+      // Update the admin to be admin role (default is user)
+      const { data: users } = await supabase.functions.invoke('auth-get-users');
+      if (users?.success && users?.users) {
+        const adminUser = users.users.find((u: any) => u.username === DEFAULT_ADMIN.username);
+        if (adminUser) {
+          await supabase.functions.invoke('auth-update-user', {
+            body: {
+              userId: adminUser.user_id,
+              updates: { role: 'admin' }
+            }
+          });
+        }
       }
     } catch (error) {
       console.error('Error creating default admin:', error);
@@ -133,44 +134,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      // Check admin credentials
-      if (username === DEFAULT_ADMIN.username && password === DEFAULT_ADMIN.password) {
-        const { data: adminData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('username', 'admin')
-          .eq('role', 'admin')
-          .single();
+      const { data, error } = await supabase.functions.invoke('auth-login', {
+        body: { username, password }
+      });
 
-        if (adminData) {
-          const typedUser = { ...adminData, role: adminData.role as 'admin' | 'user' };
-          setUser(typedUser);
-          localStorage.setItem('currentUser', JSON.stringify(typedUser));
-          return true;
-        }
+      if (error) {
+        console.error('Login error:', error);
+        return false;
       }
 
-      // Check regular user credentials
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('username', username)
-        .eq('role', 'user')
-        .single();
-
-      if (profileData) {
-        const { data: passwordData } = await supabase
-          .from('user_passwords')
-          .select('password_hash')
-          .eq('user_id', profileData.user_id)
-          .single();
-
-        if (passwordData && passwordData.password_hash === password) {
-          const typedUser = { ...profileData, role: profileData.role as 'admin' | 'user' };
-          setUser(typedUser);
-          localStorage.setItem('currentUser', JSON.stringify(typedUser));
-          return true;
-        }
+      if (data?.success && data?.user) {
+        const typedUser = { ...data.user, role: data.user.role as 'admin' | 'user' };
+        setUser(typedUser);
+        localStorage.setItem('currentUser', JSON.stringify(typedUser));
+        return true;
       }
 
       return false;
@@ -187,47 +164,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const addUser = async (username: string, password: string): Promise<boolean> => {
     try {
-      // Check if username already exists
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username)
-        .single();
+      const { data, error } = await supabase.functions.invoke('auth-add-user', {
+        body: { username, password }
+      });
 
-      if (existingUser || username === 'admin') {
+      if (error) {
+        console.error('Error adding user:', error);
         return false;
       }
 
-      const newUserId = crypto.randomUUID();
-
-      // Insert new profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: newUserId,
-          username,
-          role: 'user'
-        });
-
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-        return false;
-      }
-
-      // Insert password
-      const { error: passwordError } = await supabase
-        .from('user_passwords')
-        .insert({
-          user_id: newUserId,
-          password_hash: password // In production, this should be hashed
-        });
-
-      if (passwordError) {
-        console.error('Error creating password:', passwordError);
-        return false;
-      }
-
-      return true;
+      return data?.success || false;
     } catch (error) {
       console.error('Error adding user:', error);
       return false;
@@ -236,10 +182,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUser = async (userId: string, updates: Partial<User>): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('user_id', userId);
+      const { data, error } = await supabase.functions.invoke('auth-update-user', {
+        body: { userId, updates }
+      });
 
       if (error) {
         console.error('Error updating user:', error);
@@ -253,7 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('currentUser', JSON.stringify(updatedUser));
       }
 
-      return true;
+      return data?.success || false;
     } catch (error) {
       console.error('Error updating user:', error);
       return false;
@@ -262,17 +207,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (userId: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('user_id', userId);
+      const { data, error } = await supabase.functions.invoke('auth-delete-user', {
+        body: { userId }
+      });
 
       if (error) {
         console.error('Error deleting user:', error);
         return false;
       }
 
-      return true;
+      return data?.success || false;
     } catch (error) {
       console.error('Error deleting user:', error);
       return false;
