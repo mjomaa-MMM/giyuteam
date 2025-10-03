@@ -31,9 +31,25 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Fetched users:', profiles?.length || 0);
+    // Get roles for all users
+    const { data: roles, error: rolesError } = await supabaseAdmin
+      .from('user_roles')
+      .select('user_id, role');
+
+    if (rolesError) {
+      console.error('Error fetching roles:', rolesError);
+    }
+
+    // Map roles to profiles
+    const rolesMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
+    const usersWithRoles = profiles?.map(profile => ({
+      ...profile,
+      role: rolesMap.get(profile.user_id) || 'user'
+    })) || [];
+
+    console.log('Fetched users:', usersWithRoles.length);
     return new Response(
-      JSON.stringify({ success: true, users: profiles || [] }),
+      JSON.stringify({ success: true, users: usersWithRoles }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {

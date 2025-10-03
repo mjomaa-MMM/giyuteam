@@ -70,9 +70,18 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Get user role
+    const { data: roleData } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', profile.user_id)
+      .single();
+
+    const role = roleData?.role || 'user';
+
     console.log('Login successful for user:', username);
     return new Response(
-      JSON.stringify({ success: true, user: profile }),
+      JSON.stringify({ success: true, user: { ...profile, role } }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {

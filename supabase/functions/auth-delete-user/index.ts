@@ -30,7 +30,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Delete user (cascade will delete password)
+    // Delete user role first
+    await supabaseAdmin
+      .from('user_roles')
+      .delete()
+      .eq('user_id', userId);
+
+    // Delete user password
+    await supabaseAdmin
+      .from('user_passwords')
+      .delete()
+      .eq('user_id', userId);
+
+    // Delete user profile
     const { error } = await supabaseAdmin
       .from('profiles')
       .delete()

@@ -54,7 +54,6 @@ Deno.serve(async (req) => {
       .insert({
         user_id: userId,
         username,
-        role: 'user',
         is_subscribed: false,
       });
 
@@ -77,6 +76,25 @@ Deno.serve(async (req) => {
     if (passwordError) {
       console.error('Error storing password:', passwordError);
       // Rollback profile
+      await supabaseAdmin.from('profiles').delete().eq('user_id', userId);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to create user' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
+    // Insert default user role
+    const { error: roleError } = await supabaseAdmin
+      .from('user_roles')
+      .insert({
+        user_id: userId,
+        role: 'user',
+      });
+
+    if (roleError) {
+      console.error('Error creating role:', roleError);
+      // Rollback profile and password
+      await supabaseAdmin.from('user_passwords').delete().eq('user_id', userId);
       await supabaseAdmin.from('profiles').delete().eq('user_id', userId);
       return new Response(
         JSON.stringify({ success: false, error: 'Failed to create user' }),
