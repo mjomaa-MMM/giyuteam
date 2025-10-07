@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,6 +9,13 @@ const corsHeaders = {
 interface LoginRequest {
   username: string;
   password: string;
+}
+
+// Generate cryptographically secure session token
+function generateSessionToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 Deno.serve(async (req) => {
@@ -24,9 +32,17 @@ Deno.serve(async (req) => {
 
     const { username, password }: LoginRequest = await req.json();
 
+    // Input validation
     if (!username || !password) {
       return new Response(
         JSON.stringify({ success: false, error: 'Username and password required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
+
+    if (username.length < 3 || username.length > 50) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Username must be 3-50 characters' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
@@ -61,8 +77,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Simple password check (in production, use proper hashing like bcrypt)
-    if (passwordData.password_hash !== password) {
+    // Verify password using bcrypt
+    const isValidPassword = await bcrypt.compare(password, passwordData.password_hash);
+    
+    if (!isValidPassword) {
       console.log('Invalid password for user:', username);
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid credentials' }),
@@ -79,9 +97,41 @@ Deno.serve(async (req) => {
 
     const role = roleData?.role || 'user';
 
+    // Create session
+    const sessionToken = generateSessionToken();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour session
+
+    const { error: sessionError } = await supabaseAdmin
+      .from('sessions')
+      .insert({
+        user_id: profile.user_id,
+        session_token: sessionToken,
+        expires_at: expiresAt.toISOString()
+      });
+
+    if (sessionError) {
+      console.error('Error creating session:', sessionError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to create session' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
     console.log('Login successful for user:', username);
     return new Response(
-      JSON.stringify({ success: true, user: { ...profile, role } }),
+      JSON.stringify({ 
+        success: true, 
+        sessionToken,
+        user: { 
+          user_id: profile.user_id,
+          username: profile.username,
+          role,
+          is_subscribed: profile.is_subscribed,
+          subscription_date: profile.subscription_date,
+          next_bill_date: profile.next_bill_date
+        }
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {

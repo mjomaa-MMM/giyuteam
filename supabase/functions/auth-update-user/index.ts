@@ -9,10 +9,37 @@ interface UpdateUserRequest {
   userId: string;
   updates: {
     username?: string;
-    role?: string;
     is_subscribed?: boolean;
-    subscription_date?: string;
-    next_bill_date?: string;
+    subscription_date?: string | null;
+    next_bill_date?: string | null;
+    role?: 'admin' | 'user';
+  };
+  sessionToken: string;
+}
+
+// Verify session and get user info
+async function verifySession(supabaseAdmin: any, sessionToken: string) {
+  const { data: session, error } = await supabaseAdmin
+    .from('sessions')
+    .select('user_id')
+    .eq('session_token', sessionToken)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  if (error || !session) {
+    return null;
+  }
+
+  // Get user role
+  const { data: roleData } = await supabaseAdmin
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', session.user_id)
+    .single();
+
+  return {
+    user_id: session.user_id,
+    role: roleData?.role || 'user'
   };
 }
 
@@ -28,7 +55,44 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { userId, updates }: UpdateUserRequest = await req.json();
+    const { userId, updates, sessionToken }: UpdateUserRequest = await req.json();
+
+    // Authentication check
+    if (!sessionToken) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    const sessionUser = await verifySession(supabaseAdmin, sessionToken);
+    if (!sessionUser) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid or expired session' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    // Authorization check
+    // Users can only update their own profile (except role)
+    // Admins can update any user
+    const isAdmin = sessionUser.role === 'admin';
+    const isOwnProfile = sessionUser.user_id === userId;
+
+    if (!isAdmin && !isOwnProfile) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized - cannot update other users' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      );
+    }
+
+    // Regular users cannot change roles
+    if (!isAdmin && updates.role) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized - cannot change roles' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      );
+    }
 
     if (!userId || !updates) {
       return new Response(
@@ -37,19 +101,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract role from updates if present (handle separately)
     const { role, ...profileUpdates } = updates;
 
-    // If username is being updated, check if it already exists
+    // Validate username if provided
     if (profileUpdates.username) {
-      const { data: existing } = await supabaseAdmin
+      if (profileUpdates.username.length < 3 || profileUpdates.username.length > 50 || 
+          !/^[a-zA-Z0-9_]+$/.test(profileUpdates.username)) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Username must be 3-50 alphanumeric characters or underscores' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        );
+      }
+
+      // Check if username already exists (excluding current user)
+      const { data: existingUser } = await supabaseAdmin
         .from('profiles')
         .select('user_id')
         .eq('username', profileUpdates.username)
+        .neq('user_id', userId)
         .single();
 
-      if (existing && existing.user_id !== userId) {
-        console.log('Username already exists:', profileUpdates.username);
+      if (existingUser) {
         return new Response(
           JSON.stringify({ success: false, error: 'Username already exists' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 409 }
@@ -57,24 +129,24 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Update profile (only non-role fields)
+    // Update profile if there are profile updates
     if (Object.keys(profileUpdates).length > 0) {
-      const { error } = await supabaseAdmin
+      const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .update(profileUpdates)
         .eq('user_id', userId);
 
-      if (error) {
-        console.error('Error updating profile:', error);
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
         return new Response(
-          JSON.stringify({ success: false, error: 'Failed to update user' }),
+          JSON.stringify({ success: false, error: 'Failed to update user profile' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
         );
       }
     }
 
-    // Update role if provided
-    if (role) {
+    // Update role if provided (admin only)
+    if (role && isAdmin) {
       const { data: existingRole } = await supabaseAdmin
         .from('user_roles')
         .select('id')
@@ -82,7 +154,6 @@ Deno.serve(async (req) => {
         .single();
 
       if (existingRole) {
-        // Update existing role
         const { error: roleError } = await supabaseAdmin
           .from('user_roles')
           .update({ role })
@@ -91,12 +162,11 @@ Deno.serve(async (req) => {
         if (roleError) {
           console.error('Error updating role:', roleError);
           return new Response(
-            JSON.stringify({ success: false, error: 'Failed to update role' }),
+            JSON.stringify({ success: false, error: 'Failed to update user role' }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
           );
         }
       } else {
-        // Insert new role
         const { error: roleError } = await supabaseAdmin
           .from('user_roles')
           .insert({ user_id: userId, role });
@@ -104,14 +174,14 @@ Deno.serve(async (req) => {
         if (roleError) {
           console.error('Error creating role:', roleError);
           return new Response(
-            JSON.stringify({ success: false, error: 'Failed to update role' }),
+            JSON.stringify({ success: false, error: 'Failed to create user role' }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
           );
         }
       }
     }
 
-    console.log('User updated successfully:', userId);
+    console.log('User updated successfully:', userId, 'by:', sessionUser.user_id);
     return new Response(
       JSON.stringify({ success: true }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }

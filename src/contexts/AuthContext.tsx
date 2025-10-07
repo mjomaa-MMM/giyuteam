@@ -47,7 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUsers = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('auth-get-users');
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) return;
+
+      const { data, error } = await supabase.functions.invoke('auth-get-users', {
+        body: { sessionToken }
+      });
 
       if (error) {
         console.error('Error loading users:', error);
@@ -68,39 +73,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const createDefaultAdmin = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('auth-add-user', {
-        body: {
-          username: DEFAULT_ADMIN.username,
-          password: DEFAULT_ADMIN.password
-        }
-      });
-
-      if (error) {
-        console.error('Error creating admin:', error);
-        return;
-      }
-
-      if (!data?.success) {
-        console.error('Failed to create admin');
-      }
-
-      // Update the admin to be admin role (default is user)
-      const { data: users } = await supabase.functions.invoke('auth-get-users');
-      if (users?.success && users?.users) {
-        const adminUser = users.users.find((u: any) => u.username === DEFAULT_ADMIN.username);
-        if (adminUser) {
-          await supabase.functions.invoke('auth-update-user', {
-            body: {
-              userId: adminUser.user_id,
-              updates: { role: 'admin' }
-            }
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error creating default admin:', error);
-    }
+    // Admin creation is now handled by first login
+    // This function is no longer needed but kept for compatibility
+    console.log('Default admin creation is now handled during login');
   };
 
   const setupRealtimeSubscription = () => {
@@ -125,10 +100,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   };
 
-  const checkExistingSession = () => {
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      setUser(JSON.parse(currentUser));
+  const checkExistingSession = async () => {
+    const sessionToken = localStorage.getItem('sessionToken');
+    if (!sessionToken) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('auth-verify-session', {
+        body: { sessionToken }
+      });
+
+      if (error || !data?.success) {
+        // Session is invalid or expired, clear it
+        localStorage.removeItem('sessionToken');
+        localStorage.removeItem('currentUser');
+        return;
+      }
+
+      if (data?.user) {
+        const typedUser = { ...data.user, role: data.user.role as 'admin' | 'user' };
+        setUser(typedUser);
+        localStorage.setItem('currentUser', JSON.stringify(typedUser));
+      }
+    } catch (error) {
+      console.error('Error checking session:', error);
+      localStorage.removeItem('sessionToken');
+      localStorage.removeItem('currentUser');
     }
   };
 
@@ -143,10 +139,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      if (data?.success && data?.user) {
+      if (data?.success && data?.user && data?.sessionToken) {
         const typedUser = { ...data.user, role: data.user.role as 'admin' | 'user' };
         setUser(typedUser);
+        localStorage.setItem('sessionToken', data.sessionToken);
         localStorage.setItem('currentUser', JSON.stringify(typedUser));
+        // Load users list if admin
+        if (typedUser.role === 'admin') {
+          await loadUsers();
+        }
         return true;
       }
 
@@ -159,13 +160,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('sessionToken');
     localStorage.removeItem('currentUser');
   };
 
   const addUser = async (username: string, password: string): Promise<boolean> => {
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) {
+        console.error('No session token found');
+        return false;
+      }
+
       const { data, error } = await supabase.functions.invoke('auth-add-user', {
-        body: { username, password }
+        body: { username, password, sessionToken }
       });
 
       if (error) {
@@ -182,8 +190,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUser = async (userId: string, updates: Partial<User>): Promise<boolean> => {
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) {
+        console.error('No session token found');
+        return false;
+      }
+
       const { data, error } = await supabase.functions.invoke('auth-update-user', {
-        body: { userId, updates }
+        body: { userId, updates, sessionToken }
       });
 
       if (error) {
@@ -207,8 +221,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (userId: string): Promise<boolean> => {
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) {
+        console.error('No session token found');
+        return false;
+      }
+
       const { data, error } = await supabase.functions.invoke('auth-delete-user', {
-        body: { userId }
+        body: { userId, sessionToken }
       });
 
       if (error) {

@@ -5,6 +5,36 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface GetUsersRequest {
+  sessionToken: string;
+}
+
+// Verify session and get user info
+async function verifySession(supabaseAdmin: any, sessionToken: string) {
+  const { data: session, error } = await supabaseAdmin
+    .from('sessions')
+    .select('user_id')
+    .eq('session_token', sessionToken)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  if (error || !session) {
+    return null;
+  }
+
+  // Get user role
+  const { data: roleData } = await supabaseAdmin
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', session.user_id)
+    .single();
+
+  return {
+    user_id: session.user_id,
+    role: roleData?.role || 'user'
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -16,6 +46,24 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       { auth: { persistSession: false } }
     );
+
+    const { sessionToken }: GetUsersRequest = await req.json();
+
+    // Authentication check - only admins can get all users
+    if (!sessionToken) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    const sessionUser = await verifySession(supabaseAdmin, sessionToken);
+    if (!sessionUser || sessionUser.role !== 'admin') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized - admin access required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      );
+    }
 
     // Get all profiles
     const { data: profiles, error } = await supabaseAdmin
@@ -47,7 +95,7 @@ Deno.serve(async (req) => {
       role: rolesMap.get(profile.user_id) || 'user'
     })) || [];
 
-    console.log('Fetched users:', usersWithRoles.length);
+    console.log('Fetched users:', usersWithRoles.length, 'by admin:', sessionUser.user_id);
     return new Response(
       JSON.stringify({ success: true, users: usersWithRoles }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }

@@ -7,6 +7,33 @@ const corsHeaders = {
 
 interface DeleteUserRequest {
   userId: string;
+  sessionToken: string;
+}
+
+// Verify session and get user info
+async function verifySession(supabaseAdmin: any, sessionToken: string) {
+  const { data: session, error } = await supabaseAdmin
+    .from('sessions')
+    .select('user_id')
+    .eq('session_token', sessionToken)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  if (error || !session) {
+    return null;
+  }
+
+  // Get user role
+  const { data: roleData } = await supabaseAdmin
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', session.user_id)
+    .single();
+
+  return {
+    user_id: session.user_id,
+    role: roleData?.role || 'user'
+  };
 }
 
 Deno.serve(async (req) => {
@@ -21,7 +48,23 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { userId }: DeleteUserRequest = await req.json();
+    const { userId, sessionToken }: DeleteUserRequest = await req.json();
+
+    // Authentication check - only admins can delete users
+    if (!sessionToken) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    const sessionUser = await verifySession(supabaseAdmin, sessionToken);
+    if (!sessionUser || sessionUser.role !== 'admin') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized - admin access required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      );
+    }
 
     if (!userId) {
       return new Response(
@@ -30,7 +73,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Delete user role first
+    // Delete user sessions first
+    await supabaseAdmin
+      .from('sessions')
+      .delete()
+      .eq('user_id', userId);
+
+    // Delete user role
     await supabaseAdmin
       .from('user_roles')
       .delete()
@@ -56,7 +105,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('User deleted successfully:', userId);
+    console.log('User deleted successfully:', userId, 'by admin:', sessionUser.user_id);
     return new Response(
       JSON.stringify({ success: true }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
