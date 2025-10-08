@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
-import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
+import { compareSync } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -77,8 +77,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Verify password using bcrypt
-    const isValidPassword = await bcrypt.compare(password, passwordData.password_hash);
+    // Verify password using bcrypt (synchronous to avoid Worker issues)
+    const isValidPassword = compareSync(password, passwordData.password_hash);
     
     if (!isValidPassword) {
       console.log('Invalid password for user:', username);
