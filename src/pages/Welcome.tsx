@@ -18,7 +18,7 @@ const Welcome = () => {
     return <Navigate to={user.role === 'admin' ? '/admin/subscribers' : '/home'} replace />;
   }
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!username || !password) {
@@ -30,13 +30,14 @@ const Welcome = () => {
       return;
     }
 
-    const success = login(username, password);
+    const success = await login(username, password);
     
     if (success) {
       toast({
         title: "Welcome!",
         description: "You have successfully logged in",
       });
+      // Redirect will happen automatically because of the <Navigate /> above
     } else {
       toast({
         title: "Login Failed",
