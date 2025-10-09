@@ -62,6 +62,12 @@ const DojoNavigation = () => {
               {t('nav.payment')}
             </button>
             <button 
+              onClick={() => navigate('/news')}
+              className="text-foreground hover:text-dojo-red transition-colors font-medium"
+            >
+              News
+            </button>
+            <button 
               onClick={() => scrollToSection('contact')}
               className="text-foreground hover:text-dojo-red transition-colors font-medium"
             >
@@ -134,6 +140,12 @@ const DojoNavigation = () => {
                 className="block w-full text-left px-3 py-2 text-foreground hover:text-dojo-red transition-colors font-medium"
               >
                 {t('nav.payment')}
+              </button>
+              <button 
+                onClick={() => navigate('/news')}
+                className="block w-full text-left px-3 py-2 text-foreground hover:text-dojo-red transition-colors font-medium"
+              >
+                News
               </button>
               <button 
                 onClick={() => scrollToSection('contact')}
