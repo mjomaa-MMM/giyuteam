@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Users, Plus, CreditCard, Bell, Trash2, Edit } from 'lucide-react';
+import { LogOut, Users, Plus, CreditCard, Bell, Trash2, Edit, Newspaper } from 'lucide-react';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [editingUser, setEditingUser] = useState<string | null>(null);
@@ -148,14 +149,24 @@ const AdminDashboard = () => {
             <h1 className="text-3xl font-bold text-dojo-black">Subscribers Management</h1>
             <p className="text-muted-foreground">Welcome back, {user.username}</p>
           </div>
-          <Button 
-            onClick={handleLogout}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate('/admin/news')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Newspaper className="h-4 w-4" />
+              Manage News
+            </Button>
+            <Button 
+              onClick={handleLogout}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         {/* Add New User */}

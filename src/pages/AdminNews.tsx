@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { Trash2, Plus, Edit } from 'lucide-react';
-import DojoNavigation from '@/components/DojoNavigation';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { Trash2, Plus, Edit, ArrowLeft } from "lucide-react";
 
 interface NewsItem {
   id: string;
@@ -21,217 +20,319 @@ interface NewsItem {
 
 const AdminNews = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [news, setNews] = useState<NewsItem[]>([]);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    image_url: "",
+    published: true,
+  });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    loadNews();
-  }, []);
+    if (!user) {
+      navigate("/");
+      return;
+    }
+    fetchNews();
+  }, [user, navigate]);
 
-  const loadNews = async () => {
-    const { data, error } = await supabase
-      .from('news')
-      .select('*')
-      .order('created_at', { ascending: false });
+  const fetchNews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("news")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      toast({ title: 'Error loading news', variant: 'destructive' });
-    } else {
+      if (error) throw error;
       setNews(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const uploadImage = async (file: File): Promise<string | null> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
+  const handleImageUpload = async () => {
+    if (!imageFile) return null;
 
-    const { error: uploadError } = await supabase.storage
-      .from('news-images')
-      .upload(filePath, file);
+    setUploading(true);
+    try {
+      const fileExt = imageFile.name.split(".").pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
 
-    if (uploadError) {
-      toast({ title: 'Error uploading image', variant: 'destructive' });
+      const { error: uploadError } = await supabase.storage
+        .from("news-images")
+        .upload(filePath, imageFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from("news-images")
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error: any) {
+      toast({
+        title: "Upload Error",
+        description: error.message,
+        variant: "destructive",
+      });
       return null;
+    } finally {
+      setUploading(false);
     }
-
-    const { data } = supabase.storage
-      .from('news-images')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-    
-    setLoading(true);
 
-    let imageUrl = null;
-    if (imageFile) {
-      imageUrl = await uploadImage(imageFile);
-    }
+    try {
+      let imageUrl = formData.image_url;
 
-    if (editingId) {
-      const updateData: any = { title, content };
-      if (imageUrl) updateData.image_url = imageUrl;
-
-      const { error } = await supabase
-        .from('news')
-        .update(updateData)
-        .eq('id', editingId);
-
-      if (error) {
-        toast({ title: 'Error updating news', variant: 'destructive' });
-      } else {
-        toast({ title: 'News updated successfully' });
-        resetForm();
-        loadNews();
+      if (imageFile) {
+        const uploadedUrl = await handleImageUpload();
+        if (uploadedUrl) imageUrl = uploadedUrl;
       }
-    } else {
-      const { error } = await supabase
-        .from('news')
-        .insert([{
-          title,
-          content,
+
+      if (editingId) {
+        const { error } = await supabase
+          .from("news")
+          .update({
+            title: formData.title,
+            content: formData.content,
+            image_url: imageUrl,
+            published: formData.published,
+          })
+          .eq("id", editingId);
+
+        if (error) throw error;
+        toast({ title: "News updated successfully" });
+      } else {
+        const { error } = await supabase.from("news").insert({
+          title: formData.title,
+          content: formData.content,
           image_url: imageUrl,
-          created_by: user.id,
-          published: true
-        }]);
+          published: formData.published,
+          created_by: user?.id,
+        });
 
-      if (error) {
-        toast({ title: 'Error creating news', variant: 'destructive' });
-      } else {
-        toast({ title: 'News created successfully' });
-        resetForm();
-        loadNews();
+        if (error) throw error;
+        toast({ title: "News created successfully" });
       }
-    }
 
-    setLoading(false);
+      setFormData({ title: "", content: "", image_url: "", published: true });
+      setImageFile(null);
+      setIsEditing(false);
+      setEditingId(null);
+      fetchNews();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEdit = (item: NewsItem) => {
-    setTitle(item.title);
-    setContent(item.content);
+    setFormData({
+      title: item.title,
+      content: item.content,
+      image_url: item.image_url || "",
+      published: item.published,
+    });
     setEditingId(item.id);
+    setIsEditing(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this news item?')) return;
+    if (!confirm("Are you sure you want to delete this news item?")) return;
 
-    const { error } = await supabase
-      .from('news')
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase.from("news").delete().eq("id", id);
 
-    if (error) {
-      toast({ title: 'Error deleting news', variant: 'destructive' });
-    } else {
-      toast({ title: 'News deleted successfully' });
-      loadNews();
+      if (error) throw error;
+      toast({ title: "News deleted successfully" });
+      fetchNews();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
-  const resetForm = () => {
-    setTitle('');
-    setContent('');
-    setImageFile(null);
-    setEditingId(null);
-  };
-
-  if (!user) {
-    return <Navigate to="/" replace />;
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DojoNavigation />
-      <div className="container mx-auto px-4 py-8 pt-24">
-        <h1 className="text-4xl font-bold mb-8 text-primary">Manage News</h1>
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={() => navigate("/admin/subscribers")}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Admin
+            </Button>
+            <h1 className="text-3xl font-bold">Manage News</h1>
+          </div>
+          {!isEditing && (
+            <Button onClick={() => setIsEditing(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add News
+            </Button>
+          )}
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <Card>
+        {isEditing && (
+          <Card className="mb-6">
             <CardHeader>
-              <CardTitle>{editingId ? 'Edit News' : 'Create News'}</CardTitle>
+              <CardTitle>{editingId ? "Edit News" : "Create New News"}</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Title</label>
+                  <label className="block text-sm font-medium mb-2">Title</label>
                   <Input
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="text-sm font-medium">Content</label>
+                  <label className="block text-sm font-medium mb-2">Content</label>
                   <Textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    required
+                    value={formData.content}
+                    onChange={(e) =>
+                      setFormData({ ...formData, content: e.target.value })
+                    }
                     rows={6}
+                    required
                   />
                 </div>
+
                 <div>
-                  <label className="text-sm font-medium">Image</label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                  />
+                  <label className="block text-sm font-medium mb-2">Image</label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                    />
+                    {formData.image_url && (
+                      <img
+                        src={formData.image_url}
+                        alt="Preview"
+                        className="w-20 h-20 object-cover rounded"
+                      />
+                    )}
+                  </div>
                 </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="published"
+                    checked={formData.published}
+                    onChange={(e) =>
+                      setFormData({ ...formData, published: e.target.checked })
+                    }
+                  />
+                  <label htmlFor="published" className="text-sm font-medium">
+                    Publish immediately
+                  </label>
+                </div>
+
                 <div className="flex gap-2">
-                  <Button type="submit" disabled={loading}>
-                    {editingId ? 'Update' : 'Create'}
+                  <Button type="submit" disabled={uploading}>
+                    {uploading ? "Uploading..." : editingId ? "Update" : "Create"}
                   </Button>
-                  {editingId && (
-                    <Button type="button" variant="outline" onClick={resetForm}>
-                      Cancel
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditingId(null);
+                      setFormData({
+                        title: "",
+                        content: "",
+                        image_url: "",
+                        published: true,
+                      });
+                      setImageFile(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
                 </div>
               </form>
             </CardContent>
           </Card>
+        )}
 
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Published News</h2>
-            {news.map((item) => (
-              <Card key={item.id}>
-                <CardContent className="p-4">
+        <div className="grid gap-4">
+          {news.map((item) => (
+            <Card key={item.id}>
+              <CardContent className="p-6">
+                <div className="flex gap-4">
                   {item.image_url && (
                     <img
                       src={item.image_url}
                       alt={item.title}
-                      className="w-full h-48 object-cover rounded-md mb-3"
+                      className="w-32 h-32 object-cover rounded"
                     />
                   )}
-                  <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">{item.content}</p>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                        <p className="text-muted-foreground mb-2">{item.content}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(item.created_at).toLocaleDateString()}
+                          {!item.published && (
+                            <span className="ml-2 text-amber-500">(Draft)</span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEdit(item)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => handleDelete(item.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </div>
