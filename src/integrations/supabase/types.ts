@@ -104,6 +104,45 @@ export type Database = {
         }
         Relationships: []
       }
+      training_schedules: {
+        Row: {
+          age_group: string | null
+          color: string | null
+          created_at: string
+          days: string
+          id: string
+          time_end: string | null
+          time_start: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          age_group?: string | null
+          color?: string | null
+          created_at?: string
+          days: string
+          id?: string
+          time_end?: string | null
+          time_start?: string | null
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          age_group?: string | null
+          color?: string | null
+          created_at?: string
+          days?: string
+          id?: string
+          time_end?: string | null
+          time_start?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_passwords: {
         Row: {
           created_at: string | null

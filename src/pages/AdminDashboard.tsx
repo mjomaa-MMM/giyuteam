@@ -159,6 +159,14 @@ const AdminDashboard = () => {
               Manage News
             </Button>
             <Button 
+              onClick={() => navigate('/admin/schedule')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <CreditCard className="h-4 w-4" />
+              Manage Schedule
+            </Button>
+            <Button 
               onClick={handleLogout}
               variant="outline"
               className="flex items-center gap-2"

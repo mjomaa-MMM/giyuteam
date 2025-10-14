@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminNews from "./pages/AdminNews";
+import AdminSchedule from "./pages/AdminSchedule";
 import UserDashboard from "./pages/UserDashboard";
 import News from "./pages/News";
 import NotFound from "./pages/NotFound";
@@ -23,11 +24,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Welcome />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/welcome" element={<Welcome />} />
             <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/news" element={<News />} />
             <Route path="/admin/subscribers" element={<AdminDashboard />} />
             <Route path="/admin/news" element={<ProtectedRoute><AdminNews /></ProtectedRoute>} />
+            <Route path="/admin/schedule" element={<ProtectedRoute><AdminSchedule /></ProtectedRoute>} />
             <Route path="/dashboard" element={<UserDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

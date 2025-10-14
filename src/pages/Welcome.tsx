@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,11 @@ const Welcome = () => {
   const [password, setPassword] = useState('');
   const { user, login } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Redirect if already logged in
   if (user) {
-    return <Navigate to={user.role === 'admin' ? '/admin/subscribers' : '/home'} replace />;
+    return <Navigate to={user.role === 'admin' ? '/admin/subscribers' : '/'} replace />;
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -89,6 +90,15 @@ const Welcome = () => {
               Sign In
             </Button>
           </form>
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate('/')}
+            >
+              Continue as Guest
+            </Button>
+          </div>
           <div className="mt-6 pt-4 border-t border-border">
             <p className="text-xs text-muted-foreground text-center">
               Demo credentials: admin / ADMIN
