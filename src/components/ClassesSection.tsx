@@ -1,13 +1,15 @@
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Users, User, MessageCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const ClassesSection = () => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   
   const { data: schedules, isLoading } = useQuery({
     queryKey: ['training-schedules'],
@@ -21,6 +23,27 @@ const ClassesSection = () => {
       return data;
     }
   });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('training-schedules-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'training_schedules'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['training-schedules'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const privateClass = schedules?.find(s => s.type === 'private');
   const groupClasses = schedules?.filter(s => s.type === 'group') || [];
