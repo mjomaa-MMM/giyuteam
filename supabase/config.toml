@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.auth-delete-user]
 verify_jwt = false
+
+[functions.training-schedules-manage]
+verify_jwt = false

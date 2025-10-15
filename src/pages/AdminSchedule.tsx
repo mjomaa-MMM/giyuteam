@@ -87,11 +87,12 @@ const AdminSchedule = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const { error } = await supabase
-        .from('training_schedules')
-        .insert([data]);
-      
-      if (error) throw error;
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) throw new Error('Not authenticated');
+      const { data: resp, error } = await supabase.functions.invoke('training-schedules-manage', {
+        body: { action: 'create', data, sessionToken }
+      });
+      if (error || !resp?.success) throw error || new Error(resp?.error || 'Failed to create schedule');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['training-schedules'] });
@@ -106,12 +107,12 @@ const AdminSchedule = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof formData }) => {
-      const { error } = await supabase
-        .from('training_schedules')
-        .update(data)
-        .eq('id', id);
-      
-      if (error) throw error;
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) throw new Error('Not authenticated');
+      const { data: resp, error } = await supabase.functions.invoke('training-schedules-manage', {
+        body: { action: 'update', id, data, sessionToken }
+      });
+      if (error || !resp?.success) throw error || new Error(resp?.error || 'Failed to update schedule');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['training-schedules'] });
@@ -126,12 +127,12 @@ const AdminSchedule = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('training_schedules')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) throw new Error('Not authenticated');
+      const { data: resp, error } = await supabase.functions.invoke('training-schedules-manage', {
+        body: { action: 'delete', id, sessionToken }
+      });
+      if (error || !resp?.success) throw error || new Error(resp?.error || 'Failed to delete schedule');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['training-schedules'] });
