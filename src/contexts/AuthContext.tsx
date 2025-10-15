@@ -47,11 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUsers = async () => {
     try {
-      const sessionToken = localStorage.getItem('sessionToken');
-      if (!sessionToken) return;
-
       const { data, error } = await supabase.functions.invoke('auth-get-users', {
-        body: { sessionToken }
+        body: {}
       });
 
       if (error) {
@@ -101,30 +98,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const checkExistingSession = async () => {
-    const sessionToken = localStorage.getItem('sessionToken');
-    if (!sessionToken) return;
-
     try {
       const { data, error } = await supabase.functions.invoke('auth-verify-session', {
-        body: { sessionToken }
+        body: {}
       });
 
       if (error || !data?.success) {
-        // Session is invalid or expired, clear it
-        localStorage.removeItem('sessionToken');
-        localStorage.removeItem('currentUser');
+        // Session is invalid or expired
+        setUser(null);
         return;
       }
 
       if (data?.user) {
         const typedUser = { ...data.user, role: data.user.role as 'admin' | 'user' };
         setUser(typedUser);
-        localStorage.setItem('currentUser', JSON.stringify(typedUser));
       }
     } catch (error) {
       console.error('Error checking session:', error);
-      localStorage.removeItem('sessionToken');
-      localStorage.removeItem('currentUser');
+      setUser(null);
     }
   };
 
@@ -139,11 +130,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      if (data?.success && data?.user && data?.sessionToken) {
+      if (data?.success && data?.user) {
         const typedUser = { ...data.user, role: data.user.role as 'admin' | 'user' };
         setUser(typedUser);
-        localStorage.setItem('sessionToken', data.sessionToken);
-        localStorage.setItem('currentUser', JSON.stringify(typedUser));
         // Load users list if admin
         if (typedUser.role === 'admin') {
           await loadUsers();
@@ -160,20 +149,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('sessionToken');
-    localStorage.removeItem('currentUser');
+    // Clear session cookie by setting it to expire immediately
+    document.cookie = 'sessionToken=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0';
   };
 
   const addUser = async (username: string, password: string): Promise<boolean> => {
     try {
-      const sessionToken = localStorage.getItem('sessionToken');
-      if (!sessionToken) {
-        console.error('No session token found');
-        return false;
-      }
-
       const { data, error } = await supabase.functions.invoke('auth-add-user', {
-        body: { username, password, sessionToken }
+        body: { username, password }
       });
 
       if (error) {
@@ -190,14 +173,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUser = async (userId: string, updates: Partial<User>): Promise<boolean> => {
     try {
-      const sessionToken = localStorage.getItem('sessionToken');
-      if (!sessionToken) {
-        console.error('No session token found');
-        return false;
-      }
-
       const { data, error } = await supabase.functions.invoke('auth-update-user', {
-        body: { userId, updates, sessionToken }
+        body: { userId, updates }
       });
 
       if (error) {
@@ -209,7 +186,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user && user.user_id === userId) {
         const updatedUser = { ...user, ...updates };
         setUser(updatedUser);
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
       }
 
       return data?.success || false;
@@ -221,14 +197,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (userId: string): Promise<boolean> => {
     try {
-      const sessionToken = localStorage.getItem('sessionToken');
-      if (!sessionToken) {
-        console.error('No session token found');
-        return false;
-      }
-
       const { data, error } = await supabase.functions.invoke('auth-delete-user', {
-        body: { userId, sessionToken }
+        body: { userId }
       });
 
       if (error) {

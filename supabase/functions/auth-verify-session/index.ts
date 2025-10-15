@@ -6,7 +6,15 @@ const corsHeaders = {
 };
 
 interface VerifyRequest {
-  sessionToken: string;
+  sessionToken?: string;
+}
+
+// Helper to extract session token from cookie
+function getSessionTokenFromCookie(cookieHeader: string | null): string | null {
+  if (!cookieHeader) return null;
+  const cookies = cookieHeader.split(';').map(c => c.trim());
+  const sessionCookie = cookies.find(c => c.startsWith('sessionToken='));
+  return sessionCookie ? sessionCookie.split('=')[1] : null;
 }
 
 Deno.serve(async (req) => {
@@ -21,7 +29,13 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { sessionToken }: VerifyRequest = await req.json();
+    // Try to get session token from cookie first, then from request body
+    let sessionToken = getSessionTokenFromCookie(req.headers.get('cookie'));
+    
+    if (!sessionToken) {
+      const body: VerifyRequest = await req.json();
+      sessionToken = body.sessionToken || null;
+    }
 
     if (!sessionToken) {
       return new Response(

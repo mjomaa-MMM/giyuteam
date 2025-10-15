@@ -13,6 +13,14 @@ interface AddUserRequest {
   sessionToken?: string;
 }
 
+// Helper to extract session token from cookie
+function getSessionTokenFromCookie(cookieHeader: string | null): string | null {
+  if (!cookieHeader) return null;
+  const cookies = cookieHeader.split(';').map(c => c.trim());
+  const sessionCookie = cookies.find(c => c.startsWith('sessionToken='));
+  return sessionCookie ? sessionCookie.split('=')[1] : null;
+}
+
 // Verify session and get user info
 async function verifySession(supabaseAdmin: any, sessionToken: string) {
   const { data: session, error } = await supabaseAdmin
@@ -51,7 +59,14 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { username, password, role = 'user', sessionToken }: AddUserRequest = await req.json();
+    const body: AddUserRequest = await req.json();
+    const { username, password, role = 'user' } = body;
+    
+    // Try to get session token from cookie first, then from request body
+    let sessionToken = getSessionTokenFromCookie(req.headers.get('cookie'));
+    if (!sessionToken) {
+      sessionToken = body.sessionToken || null;
+    }
 
     // Authentication check - only admins can add users
     if (!sessionToken) {

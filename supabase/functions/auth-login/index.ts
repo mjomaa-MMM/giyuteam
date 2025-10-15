@@ -119,10 +119,17 @@ Deno.serve(async (req) => {
     }
 
     console.log('Login successful for user:', username);
+    
+    // Set HTTP-only cookie for session token
+    const cookieHeaders = {
+      ...corsHeaders,
+      'Content-Type': 'application/json',
+      'Set-Cookie': `sessionToken=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${24 * 60 * 60}`
+    };
+    
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        sessionToken,
+        success: true,
         user: { 
           user_id: profile.user_id,
           username: profile.username,
@@ -132,7 +139,7 @@ Deno.serve(async (req) => {
           next_bill_date: profile.next_bill_date
         }
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      { headers: cookieHeaders, status: 200 }
     );
   } catch (error) {
     console.error('Login error:', error);
