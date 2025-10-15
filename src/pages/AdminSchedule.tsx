@@ -60,7 +60,8 @@ const AdminSchedule = () => {
       
       if (error) throw error;
       return data as Schedule[];
-    }
+    },
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

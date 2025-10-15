@@ -21,7 +21,8 @@ const ClassesSection = () => {
       
       if (error) throw error;
       return data;
-    }
+    },
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
