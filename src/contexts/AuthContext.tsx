@@ -38,11 +38,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
 
-  // Initialize and load users from database
+  // Initialize - check session first, then load users if admin
   useEffect(() => {
-    loadUsers();
-    setupRealtimeSubscription();
-    checkExistingSession();
+    const init = async () => {
+      await checkExistingSession();
+      setupRealtimeSubscription();
+    };
+    init();
   }, []);
 
   const loadUsers = async () => {
@@ -52,28 +54,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error('Error loading users:', error);
         return;
       }
 
       if (data?.success && data?.users) {
         setUsers(data.users.map((user: any) => ({ ...user, role: user.role as 'admin' | 'user' })));
-        
-        // Create admin user if no users exist
-        if (data.users.length === 0) {
-          await createDefaultAdmin();
-        }
       }
     } catch (error) {
-      console.error('Error in loadUsers:', error);
+      // Silently fail - user list will be empty
     }
   };
 
-  const createDefaultAdmin = async () => {
-    // Admin creation is now handled by first login
-    // This function is no longer needed but kept for compatibility
-    console.log('Default admin creation is now handled during login');
-  };
 
   const setupRealtimeSubscription = () => {
     const channel = supabase
@@ -104,7 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error || !data?.success) {
-        // Session is invalid or expired
         setUser(null);
         return;
       }
@@ -112,6 +102,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data?.user) {
         const typedUser = { ...data.user, role: data.user.role as 'admin' | 'user' };
         setUser(typedUser);
+        
+        // Load users if admin
+        if (typedUser.role === 'admin') {
+          await loadUsers();
+        }
       }
     } catch (error) {
       console.error('Error checking session:', error);

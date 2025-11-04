@@ -99,11 +99,6 @@ const Welcome = () => {
               Continue as Guest
             </Button>
           </div>
-          <div className="mt-6 pt-4 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center">
-              Demo credentials: admin / ADMIN
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
