@@ -130,6 +130,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
+        sessionToken,
         user: { 
           user_id: profile.user_id,
           username: profile.username,

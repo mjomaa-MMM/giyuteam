@@ -90,11 +90,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkExistingSession = async () => {
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
+      
+      if (!sessionToken) {
+        setUser(null);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('auth-verify-session', {
-        body: {}
+        body: { sessionToken }
       });
 
       if (error || !data?.success) {
+        localStorage.removeItem('sessionToken');
         setUser(null);
         return;
       }
@@ -110,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error checking session:', error);
+      localStorage.removeItem('sessionToken');
       setUser(null);
     }
   };
@@ -125,7 +134,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      if (data?.success && data?.user) {
+      if (data?.success && data?.user && data?.sessionToken) {
+        // Store session token
+        localStorage.setItem('sessionToken', data.sessionToken);
+        
         const typedUser = { ...data.user, role: data.user.role as 'admin' | 'user' };
         setUser(typedUser);
         // Load users list if admin
@@ -144,8 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    // Clear session cookie by setting it to expire immediately
-    document.cookie = 'sessionToken=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0';
+    localStorage.removeItem('sessionToken');
   };
 
   const addUser = async (username: string, password: string): Promise<boolean> => {
