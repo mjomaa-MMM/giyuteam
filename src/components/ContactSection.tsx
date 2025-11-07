@@ -4,9 +4,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Phone, Mail, MapPin, MessageCircle, Facebook, Instagram } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ContactInfo {
+  phone: string;
+  email: string;
+  address: string;
+  whatsapp: string;
+  facebook: string;
+  instagram: string;
+}
 
 const ContactSection = () => {
   const { t } = useTranslation();
@@ -16,16 +26,39 @@ const ContactSection = () => {
     email: '',
     message: ''
   });
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    phone: '',
+    email: '',
+    address: '',
+    whatsapp: '',
+    facebook: '',
+    instagram: ''
+  });
+
+  useEffect(() => {
+    const loadContactInfo = async () => {
+      const { data } = await supabase.from('contact_info').select('*');
+      
+      if (data) {
+        const infoMap: any = {};
+        data.forEach(item => {
+          infoMap[item.info_key] = item.info_value;
+        });
+        setContactInfo(infoMap);
+      }
+    };
+
+    loadContactInfo();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Create mailto link
     const subject = encodeURIComponent(`Contact from ${formData.name} - Giyu Team By Jomaa`);
     const body = encodeURIComponent(
       `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
     );
-    const mailtoLink = `mailto:GiyuTeamByJomaa@gmail.com?subject=${subject}&body=${body}`;
+    const mailtoLink = `mailto:${contactInfo.email}?subject=${subject}&body=${body}`;
     
     window.location.href = mailtoLink;
     
@@ -34,28 +67,27 @@ const ContactSection = () => {
       description: "Your email client should open with the message ready to send.",
     });
     
-    // Reset form
     setFormData({ name: '', email: '', message: '' });
   };
 
-  const contactInfo = [
+  const contactDetails = [
     {
       icon: Phone,
       title: "Phone",
-      detail: "+961-70520091",
-      action: () => window.open('tel:+96170520091')
+      detail: contactInfo.phone,
+      action: () => window.open(`tel:${contactInfo.phone.replace(/\D/g, '')}`)
     },
     {
       icon: Mail,
       title: "Email", 
-      detail: "GiyuTeamByJomaa@gmail.com",
-      action: () => window.open('mailto:GiyuTeamByJomaa@gmail.com')
+      detail: contactInfo.email,
+      action: () => window.open(`mailto:${contactInfo.email}`)
     },
     {
       icon: MapPin,
       title: "Location",
-      detail: "Houmin al Fawka, Nabatiyeh, Lebanon",
-      action: () => window.open('https://maps.google.com/?q=Houmin+al+Fawka,+Nabatiyeh,+Lebanon')
+      detail: contactInfo.address,
+      action: () => window.open(`https://maps.google.com/?q=${encodeURIComponent(contactInfo.address)}`)
     }
   ];
 
@@ -63,13 +95,13 @@ const ContactSection = () => {
     {
       icon: Facebook,
       name: "Facebook",
-      url: "https://www.facebook.com/people/GIYU-team/61575069417497/",
+      url: contactInfo.facebook,
       color: "text-blue-600 hover:text-blue-700"
     },
     {
       icon: Instagram, 
       name: "Instagram",
-      url: "https://www.instagram.com/p/DMIrux_sPsE/?utm_source=ig_web_copy_link",
+      url: contactInfo.instagram,
       color: "text-pink-600 hover:text-pink-700"
     }
   ];
@@ -87,12 +119,11 @@ const ContactSection = () => {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Information */}
           <div>
             <h3 className="text-2xl font-bold text-foreground mb-8">{t('contact.info')}</h3>
             
             <div className="space-y-6 mb-8">
-              {contactInfo.map((info, index) => (
+              {contactDetails.map((info, index) => (
                 <Card key={index} className="hover:shadow-md transition-shadow duration-300 cursor-pointer border-border/50" onClick={info.action}>
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
@@ -109,7 +140,6 @@ const ContactSection = () => {
               ))}
             </div>
 
-            {/* WhatsApp CTA */}
             <Card className="bg-green-50 border-green-200 mb-8">
               <CardContent className="p-6 text-center">
                 <MessageCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
@@ -118,7 +148,7 @@ const ContactSection = () => {
                 <Button 
                   variant="whatsapp" 
                   size="lg"
-                  onClick={() => window.open('https://wa.me/96170520091', '_blank')}
+                  onClick={() => window.open(`https://wa.me/${contactInfo.whatsapp}`, '_blank')}
                   className="w-full"
                 >
                   <MessageCircle className="w-5 h-5" />
@@ -127,7 +157,6 @@ const ContactSection = () => {
               </CardContent>
             </Card>
 
-            {/* Social Media */}
             <div>
               <h4 className="text-lg font-semibold text-foreground mb-4">Follow Us</h4>
               <div className="flex gap-4">
@@ -146,7 +175,6 @@ const ContactSection = () => {
             </div>
           </div>
 
-          {/* Contact Form */}
           <div>
             <Card className="border-border/50">
               <CardHeader>
