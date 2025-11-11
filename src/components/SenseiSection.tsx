@@ -4,7 +4,7 @@ import { Award, Clock, Users2, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import senseiImage from "@/assets/sensei-portrait.png";
+import senseiImage from "@/assets/sensei-portrait-new.png";
 
 interface SenseiInfo {
   id: string;
