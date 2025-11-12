@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Users, Plus, CreditCard, Bell, Trash2, Edit, Newspaper } from 'lucide-react';
+import { LogOut, Users, Plus, CreditCard, Bell, Trash2, Edit, Newspaper, FileText } from 'lucide-react';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -150,6 +150,14 @@ const AdminDashboard = () => {
             <p className="text-muted-foreground">Welcome back, {user.username}</p>
           </div>
           <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate('/admin/content')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Edit Content
+            </Button>
             <Button 
               onClick={() => navigate('/admin/news')}
               variant="outline"
