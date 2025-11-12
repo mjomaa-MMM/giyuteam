@@ -151,14 +151,6 @@ const AdminDashboard = () => {
           </div>
           <div className="flex gap-2">
             <Button 
-              onClick={() => navigate('/admin/content')}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Edit className="h-4 w-4" />
-              Manage Content
-            </Button>
-            <Button 
               onClick={() => navigate('/admin/news')}
               variant="outline"
               className="flex items-center gap-2"
