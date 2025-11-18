@@ -49,8 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUsers = async () => {
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
       const { data, error } = await supabase.functions.invoke('auth-get-users', {
-        body: {}
+        body: { sessionToken }
       });
 
       if (error) {
@@ -161,8 +162,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const addUser = async (username: string, password: string): Promise<boolean> => {
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
       const { data, error } = await supabase.functions.invoke('auth-add-user', {
-        body: { username, password }
+        body: { username, password, sessionToken }
       });
 
       if (error) {
@@ -179,8 +181,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUser = async (userId: string, updates: Partial<User>): Promise<boolean> => {
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
       const { data, error } = await supabase.functions.invoke('auth-update-user', {
-        body: { userId, updates }
+        body: { userId, updates, sessionToken }
       });
 
       if (error) {
@@ -203,8 +206,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (userId: string): Promise<boolean> => {
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
       const { data, error } = await supabase.functions.invoke('auth-delete-user', {
-        body: { userId }
+        body: { userId, sessionToken }
       });
 
       if (error) {
