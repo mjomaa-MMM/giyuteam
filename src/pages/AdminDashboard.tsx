@@ -44,10 +44,10 @@ const AdminDashboard = () => {
       return;
     }
 
-    if (newPassword.length < 4) {
+    if (newPassword.length < 8) {
       toast({
         title: "Error",
-        description: "Password must be at least 4 characters long",
+        description: "Password must be at least 8 characters long",
         variant: "destructive",
       });
       return;
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
     } else {
       toast({
         title: "Error",
-        description: "Username already exists. Please choose a different one.",
+        description: "Failed to create user. The username may already exist or the password is too weak.",
         variant: "destructive",
       });
     }
