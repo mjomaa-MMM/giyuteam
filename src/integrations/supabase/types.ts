@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_info: {
+        Row: {
+          created_at: string
+          id: string
+          info_key: string
+          info_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          info_key: string
+          info_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          info_key?: string
+          info_value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      core_values: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          icon: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order: number
+          icon: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dojo_info: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          section_key: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          section_key: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          section_key?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           content: string
@@ -80,6 +161,39 @@ export type Database = {
         }
         Relationships: []
       }
+      sensei_info: {
+        Row: {
+          bio: string
+          created_at: string
+          experience_years: number
+          id: string
+          image_url: string | null
+          name: string
+          rank: string
+          updated_at: string
+        }
+        Insert: {
+          bio: string
+          created_at?: string
+          experience_years: number
+          id?: string
+          image_url?: string | null
+          name: string
+          rank: string
+          updated_at?: string
+        }
+        Update: {
+          bio?: string
+          created_at?: string
+          experience_years?: number
+          id?: string
+          image_url?: string | null
+          name?: string
+          rank?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sessions: {
         Row: {
           created_at: string
@@ -101,6 +215,30 @@ export type Database = {
           id?: string
           session_token?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -198,10 +336,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_expired_sessions: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_expired_sessions: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

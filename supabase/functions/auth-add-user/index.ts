@@ -107,13 +107,12 @@ Deno.serve(async (req) => {
     }
 
     // Check if username already exists
-    const { data: existingUser } = await supabaseAdmin
+    const { data: existingUsers } = await supabaseAdmin
       .from('profiles')
       .select('username')
-      .eq('username', username)
-      .single();
+      .eq('username', username);
 
-    if (existingUser) {
+    if (existingUsers && existingUsers.length > 0) {
       return new Response(
         JSON.stringify({ success: false, error: 'Username already exists' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 409 }
