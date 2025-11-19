@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
-import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
+import { hash } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -122,8 +122,8 @@ Deno.serve(async (req) => {
     // Generate unique user ID
     const userId = crypto.randomUUID();
 
-    // Hash password with bcrypt (12 salt rounds)
-    const passwordHash = await bcrypt.hash(password, 12);
+    // Hash password with bcrypt (default cost factor of 10)
+    const passwordHash = await hash(password);
 
     // Insert profile
     const { error: profileError } = await supabaseAdmin
