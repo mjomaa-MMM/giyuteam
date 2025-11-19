@@ -172,7 +172,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      return data?.success || false;
+      if (data?.success) {
+        await loadUsers(); // Reload users list immediately
+        return true;
+      }
+
+      return false;
     } catch (error) {
       console.error('Error adding user:', error);
       return false;
