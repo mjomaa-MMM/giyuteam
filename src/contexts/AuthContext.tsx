@@ -18,7 +18,7 @@ interface AuthContextType {
   users: User[];
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  addUser: (username: string, password: string) => Promise<boolean>;
+  addUser: (username: string, password: string, role?: 'admin' | 'user', beltColor?: string) => Promise<boolean>;
   updateUser: (userId: string, updates: Partial<User>) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<boolean>;
   toggleSubscription: (userId: string) => Promise<void>;
@@ -160,11 +160,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('sessionToken');
   };
 
-  const addUser = async (username: string, password: string): Promise<boolean> => {
+  const addUser = async (username: string, password: string, role: 'admin' | 'user' = 'user', beltColor: string = 'white'): Promise<boolean> => {
     try {
       const sessionToken = localStorage.getItem('sessionToken');
       const { data, error } = await supabase.functions.invoke('auth-add-user', {
-        body: { username, password, sessionToken }
+        body: { username, password, role, belt_color: beltColor, sessionToken }
       });
 
       if (error) {

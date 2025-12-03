@@ -130,6 +130,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          belt_color: string | null
           created_at: string | null
           id: string
           is_subscribed: boolean | null
@@ -140,6 +141,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          belt_color?: string | null
           created_at?: string | null
           id?: string
           is_subscribed?: boolean | null
@@ -150,6 +152,7 @@ export type Database = {
           username: string
         }
         Update: {
+          belt_color?: string | null
           created_at?: string | null
           id?: string
           is_subscribed?: boolean | null

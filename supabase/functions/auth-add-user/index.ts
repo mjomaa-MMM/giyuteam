@@ -10,6 +10,7 @@ interface AddUserRequest {
   username: string;
   password: string;
   role?: 'admin' | 'user';
+  belt_color?: string;
   sessionToken?: string;
 }
 
@@ -60,7 +61,11 @@ Deno.serve(async (req) => {
     );
 
     const body: AddUserRequest = await req.json();
-    const { username, password, role = 'user' } = body;
+    const { username, password, role = 'user', belt_color = 'white' } = body;
+    
+    // Validate belt color
+    const validColors = ['white', 'orange', 'blue', 'yellow', 'green', 'brown', 'black'];
+    const normalizedBeltColor = validColors.includes(belt_color) ? belt_color : 'white';
     
     // Try to get session token from cookie first, then from request body
     let sessionToken = getSessionTokenFromCookie(req.headers.get('cookie'));
@@ -131,7 +136,8 @@ Deno.serve(async (req) => {
       .insert({
         user_id: userId,
         username: username,
-        is_subscribed: false
+        is_subscribed: false,
+        belt_color: normalizedBeltColor
       });
 
     if (profileError) {
