@@ -9,8 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, Users, Plus, CreditCard, Bell, Trash2, Edit, Newspaper, FileText } from 'lucide-react';
-
-const BELT_COLORS = ['white', 'orange', 'blue', 'yellow', 'green', 'brown', 'black'] as const;
+import { BELT_COLORS, getBeltColorClasses } from '@/lib/beltColors';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -264,13 +263,15 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {users.map((userData) => (
+              {users.map((userData) => {
+                const beltColors = getBeltColorClasses((userData as any).belt_color);
+                return (
                 <div
                   key={userData.id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                  className={`flex items-center justify-between p-3 rounded-lg border-2 bg-card ${beltColors.border}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-dojo-red flex items-center justify-center text-white text-sm font-bold">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${beltColors.bg} ${beltColors.text}`}>
                       {userData.username.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1">
@@ -351,13 +352,14 @@ const AdminDashboard = () => {
                     )}
                     <Badge 
                       variant={userData.role === 'admin' ? 'default' : 'secondary'}
-                      className={userData.role === 'admin' ? 'bg-dojo-red' : ''}
+                      className={userData.role === 'admin' ? 'bg-dojo-red' : `${beltColors.bg} ${beltColors.text}`}
                     >
-                      {userData.role}
+                      {(userData as any).belt_color || 'white'}
                     </Badge>
                   </div>
                 </div>
-              ))}
+              );
+              })}
               {users.length === 0 && (
                 <p className="text-center text-muted-foreground py-8">
                   No users found. Create your first user above.
