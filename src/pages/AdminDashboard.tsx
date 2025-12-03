@@ -5,14 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, Users, Plus, CreditCard, Bell, Trash2, Edit, Newspaper, FileText } from 'lucide-react';
+
+const BELT_COLORS = ['white', 'orange', 'blue', 'yellow', 'green', 'brown', 'black'] as const;
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [newBeltColor, setNewBeltColor] = useState<string>('white');
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [editUsername, setEditUsername] = useState('');
   const { user, users, logout, addUser, updateUser, deleteUser, toggleSubscription, setTestNotification } = useAuth();
@@ -53,7 +57,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    const success = await addUser(newUsername, newPassword);
+    const success = await addUser(newUsername, newPassword, 'user', newBeltColor);
     
     if (success) {
       toast({
@@ -62,6 +66,7 @@ const AdminDashboard = () => {
       });
       setNewUsername('');
       setNewPassword('');
+      setNewBeltColor('white');
     } else {
       toast({
         title: "Error",
@@ -198,7 +203,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddUser} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="newUsername">Username</Label>
                   <Input
@@ -218,6 +223,21 @@ const AdminDashboard = () => {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="beltColor">Belt Color</Label>
+                  <Select value={newBeltColor} onValueChange={setNewBeltColor}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select belt color" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background">
+                      {BELT_COLORS.map((color) => (
+                        <SelectItem key={color} value={color} className="capitalize">
+                          {color}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <Button 
