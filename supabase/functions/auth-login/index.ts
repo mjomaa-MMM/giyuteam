@@ -97,7 +97,13 @@ Deno.serve(async (req) => {
 
     const role = roleData?.role || 'user';
 
-    // Create session
+    // Clean up old sessions for this user first
+    await supabaseAdmin
+      .from('sessions')
+      .delete()
+      .eq('user_id', profile.user_id);
+
+    // Create new session
     const sessionToken = generateSessionToken();
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour session
