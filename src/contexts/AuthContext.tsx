@@ -6,6 +6,7 @@ interface User {
   user_id: string;
   username: string;
   role: 'admin' | 'user';
+  belt_color?: string;
   is_subscribed?: boolean;
   subscription_date?: string;
   next_bill_date?: string;

@@ -3,14 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, Shield } from 'lucide-react';
 import { format } from 'date-fns';
+import { getBeltColorClasses } from '@/lib/beltColors';
 
 const UserPanel = () => {
   const { user } = useAuth();
 
   if (!user) return null;
 
+  const beltColors = getBeltColorClasses(user.belt_color);
+
   return (
-    <Card className="w-full">
+    <Card className={`w-full border-2 ${beltColors.border}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User className="h-5 w-5" />
@@ -30,6 +33,13 @@ const UserPanel = () => {
             <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="gap-1">
               <Shield className="h-3 w-3" />
               {user.role}
+            </Badge>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-muted-foreground">Belt Color</span>
+            <Badge className={`${beltColors.bg} ${beltColors.text} capitalize`}>
+              {user.belt_color || 'white'}
             </Badge>
           </div>
           

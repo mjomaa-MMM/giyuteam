@@ -102,6 +102,7 @@ Deno.serve(async (req) => {
           user_id: profile.user_id,
           username: profile.username,
           role,
+          belt_color: profile.belt_color || 'white',
           is_subscribed: profile.is_subscribed,
           subscription_date: profile.subscription_date,
           next_bill_date: profile.next_bill_date
