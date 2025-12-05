@@ -47,7 +47,7 @@ const UserDashboard = () => {
   };
 
   const goToMainSite = () => {
-    window.location.href = '/home';
+    window.location.href = '/site';
   };
 
   return (
