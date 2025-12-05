@@ -1,14 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, MessageCircle, LogIn } from "lucide-react";
+import { Menu, X, MessageCircle, LogIn, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import LanguageToggle from "./LanguageToggle";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const DojoNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { toast } = useToast();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -16,6 +20,15 @@ const DojoNavigation = () => {
       element.scrollIntoView({ behavior: 'smooth' });
       setIsOpen(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out",
+    });
+    navigate('/welcome');
   };
 
   return (
@@ -81,15 +94,34 @@ const DojoNavigation = () => {
               <MessageCircle className="w-4 h-4" />
               {t('nav.register')}
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/welcome')}
-              className="border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
-            >
-              <LogIn className="w-4 h-4" />
-              Login
-            </Button>
+            
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full">
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-primary">{user.username}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleLogout}
+                  className="border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/welcome')}
+                className="border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
+              >
+                <LogIn className="w-4 h-4" />
+                Login
+              </Button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -108,6 +140,12 @@ const DojoNavigation = () => {
         {isOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t border-border">
+              {user && (
+                <div className="flex items-center gap-2 px-3 py-2 mb-2 bg-primary/10 rounded-lg">
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-primary">{user.username}</span>
+                </div>
+              )}
               <div className="px-3 py-2">
                 <LanguageToggle />
               </div>
@@ -165,15 +203,27 @@ const DojoNavigation = () => {
                 </Button>
               </div>
               <div className="px-3 py-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="w-full border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
-                  onClick={() => navigate('/welcome')}
-                >
-                  <LogIn className="w-4 h-4" />
-                  Login
-                </Button>
+                {user ? (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="w-full border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="w-full border-dojo-red text-dojo-red hover:bg-dojo-red hover:text-white"
+                    onClick={() => navigate('/welcome')}
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Login
+                  </Button>
+                )}
               </div>
             </div>
           </div>

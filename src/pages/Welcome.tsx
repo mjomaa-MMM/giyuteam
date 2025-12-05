@@ -19,7 +19,7 @@ const Welcome = () => {
 
   // Redirect if already logged in
   if (user) {
-    return <Navigate to={user.role === 'admin' ? '/admin/subscribers' : '/'} replace />;
+    return <Navigate to={user.role === 'admin' ? '/admin/subscribers' : '/site'} replace />;
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -143,7 +143,7 @@ const Welcome = () => {
           <Button
             variant="outline"
             className="w-full h-11 border-border/60 hover:bg-accent/50 hover:border-primary/30 transition-all duration-200"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/site')}
             disabled={isLoading}
           >
             Continue as Guest
