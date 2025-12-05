@@ -38,8 +38,8 @@ const UserDashboard = () => {
     return <Navigate to="/admin/subscribers" replace />;
   }
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out",
