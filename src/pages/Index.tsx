@@ -6,6 +6,7 @@ import ClassesSection from "@/components/ClassesSection";
 import ContactSection from "@/components/ContactSection";
 import PaymentSection from "@/components/PaymentSection";
 import Footer from "@/components/Footer";
+import DojoChatbot from "@/components/DojoChatbot";
 
 const Index = () => {
   return (
@@ -18,6 +19,7 @@ const Index = () => {
       <PaymentSection />
       <ContactSection />
       <Footer />
+      <DojoChatbot />
     </div>
   );
 };
