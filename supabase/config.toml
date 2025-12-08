@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.training-schedules-manage]
 verify_jwt = false
+
+[functions.dojo-chat]
+verify_jwt = false
