@@ -95,7 +95,7 @@ const DojoNavigation = () => {
             <Button 
               variant="whatsapp" 
               size="sm"
-              onClick={() => window.open('https://wa.me/96170520091', '_blank')}
+              onClick={() => window.open('https://wa.me/0096170520091', '_blank')}
             >
               <MessageCircle className="w-4 h-4" />
               {t('nav.register')}
@@ -208,7 +208,7 @@ const DojoNavigation = () => {
                   variant="whatsapp" 
                   size="sm"
                   className="w-full"
-                  onClick={() => window.open('https://wa.me/96170520091', '_blank')}
+                  onClick={() => window.open('https://wa.me/0096170520091', '_blank')}
                 >
                   <MessageCircle className="w-4 h-4" />
                   {t('nav.register')}

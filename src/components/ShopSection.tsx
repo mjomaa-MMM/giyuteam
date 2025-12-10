@@ -51,8 +51,7 @@ const ShopSection = () => {
       ? `مرحباً، أود طلب: ${productName} - السعر: $${product.price}`
       : `Hello, I would like to order: ${productName} - Price: $${product.price}`;
     
-    // Replace with actual WhatsApp number
-    const whatsappNumber = "96176123456";
+    const whatsappNumber = "0096170520091";
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
