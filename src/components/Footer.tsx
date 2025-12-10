@@ -19,7 +19,7 @@ const Footer = () => {
             </p>
             <Button 
               variant="whatsapp" 
-              onClick={() => window.open('https://wa.me/96170520091', '_blank')}
+              onClick={() => window.open('https://wa.me/0096170520091', '_blank')}
             >
               <MessageCircle className="w-4 h-4" />
               {t('nav.register')}
