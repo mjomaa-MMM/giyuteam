@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, Upload } from 'lucide-react';
+import { ArrowLeft, Save, Upload, ShoppingBag } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const AdminContent = () => {
@@ -271,6 +271,10 @@ const AdminContent = () => {
             </Button>
             <h1 className="text-3xl font-bold">Manage Website Content</h1>
           </div>
+          <Button onClick={() => navigate('/admin/shop')} className="gap-2">
+            <ShoppingBag className="w-4 h-4" />
+            Manage Shop
+          </Button>
         </div>
 
         <Tabs defaultValue="hero" className="w-full">
