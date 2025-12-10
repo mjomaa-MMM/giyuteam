@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminNews from "./pages/AdminNews";
 import AdminSchedule from "./pages/AdminSchedule";
 import AdminContent from "./pages/AdminContent";
+import AdminShop from "./pages/AdminShop";
 import UserDashboard from "./pages/UserDashboard";
 import News from "./pages/News";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/admin/news" element={<ProtectedRoute><AdminNews /></ProtectedRoute>} />
               <Route path="/admin/schedule" element={<ProtectedRoute><AdminSchedule /></ProtectedRoute>} />
               <Route path="/admin/content" element={<ProtectedRoute><AdminContent /></ProtectedRoute>} />
+              <Route path="/admin/shop" element={<ProtectedRoute><AdminShop /></ProtectedRoute>} />
               <Route path="/dashboard" element={<UserDashboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
