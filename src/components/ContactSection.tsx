@@ -118,7 +118,7 @@ const ContactSection = () => {
                 <Button 
                   variant="whatsapp" 
                   size="lg"
-                  onClick={() => window.open('https://wa.me/0096170520091', '_blank')}
+                  onClick={() => window.open('https://wa.me/96170520091', '_blank')}
                   className="w-full"
                 >
                   <MessageCircle className="w-5 h-5" />
