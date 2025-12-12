@@ -47,9 +47,21 @@ const ShopSection = () => {
 
   const handleOrderViaWhatsApp = (product: Product) => {
     const productName = isArabic && product.name_ar ? product.name_ar : product.name;
+    const productDescription = isArabic && product.description_ar ? product.description_ar : product.description;
+    
     const message = isArabic 
-      ? `مرحباً، أود طلب: ${productName} - السعر: $${product.price}`
-      : `Hello, I would like to order: ${productName} - Price: $${product.price}`;
+      ? `مرحباً، أود طلب المنتج التالي:
+
+📦 *${productName}*
+${productDescription ? `📝 ${productDescription}` : ''}
+💰 السعر: $${Number(product.price).toFixed(2)}
+${product.image_url ? `🖼️ صورة المنتج: ${product.image_url}` : ''}`
+      : `Hello, I would like to order the following product:
+
+📦 *${productName}*
+${productDescription ? `📝 ${productDescription}` : ''}
+💰 Price: $${Number(product.price).toFixed(2)}
+${product.image_url ? `🖼️ Product Image: ${product.image_url}` : ''}`;
     
     const whatsappNumber = "96170520091";
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
