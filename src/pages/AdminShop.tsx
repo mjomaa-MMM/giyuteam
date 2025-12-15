@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, Save, ShoppingBag, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, ShoppingBag, GripVertical, Upload, ImageIcon } from "lucide-react";
 
 interface Product {
   id: string;
@@ -30,6 +30,8 @@ const AdminShop = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<string | null>(null);
+  const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -164,6 +166,53 @@ const AdminShop = () => {
     ));
   };
 
+  const handleImageUpload = async (productId: string, file: File) => {
+    setUploading(productId);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${productId}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // Delete old image if exists
+      const product = products.find(p => p.id === productId);
+      if (product?.image_url) {
+        const oldPath = product.image_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from('product-images').remove([oldPath]);
+        }
+      }
+
+      // Upload new image
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      // Update product with new image URL
+      updateProductField(productId, 'image_url', publicUrl);
+
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully"
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload image",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -277,12 +326,47 @@ const AdminShop = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Image URL</Label>
-                    <Input
-                      value={product.image_url || ''}
-                      onChange={(e) => updateProductField(product.id, 'image_url', e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                    />
+                    <Label>Product Image</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={(el) => fileInputRefs.current[product.id] = el}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(product.id, file);
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="gap-2 flex-1"
+                        onClick={() => fileInputRefs.current[product.id]?.click()}
+                        disabled={uploading === product.id}
+                      >
+                        {uploading === product.id ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4" />
+                            Upload Image
+                          </>
+                        )}
+                      </Button>
+                      {product.image_url && (
+                        <div className="h-10 w-10 rounded border overflow-hidden flex-shrink-0">
+                          <img 
+                            src={product.image_url} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Display Order</Label>
