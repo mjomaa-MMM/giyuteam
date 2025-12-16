@@ -43,13 +43,18 @@ const AdminShop = () => {
 
   const fetchProducts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('display_order', { ascending: true });
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) throw new Error('Not authenticated');
 
-      if (error) throw error;
-      setProducts(data || []);
+      const { data, error } = await supabase.functions.invoke('products-manage', {
+        body: { action: 'list', sessionToken }
+      });
+
+      if (error || !data?.success) {
+        throw error || new Error(data?.error || 'Failed to load products');
+      }
+
+      setProducts((data.products || []) as Product[]);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast({
@@ -65,26 +70,37 @@ const AdminShop = () => {
   const handleUpdateProduct = async (product: Product) => {
     setSaving(product.id);
     try {
-      const { error } = await supabase
-        .from('products')
-        .update({
-          name: product.name,
-          name_ar: product.name_ar,
-          description: product.description,
-          description_ar: product.description_ar,
-          price: product.price,
-          image_url: product.image_url,
-          is_active: product.is_active,
-          display_order: product.display_order
-        })
-        .eq('id', product.id);
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) throw new Error('Not authenticated');
 
-      if (error) throw error;
+      const { data, error } = await supabase.functions.invoke('products-manage', {
+        body: {
+          action: 'update',
+          id: product.id,
+          data: {
+            name: product.name,
+            name_ar: product.name_ar,
+            description: product.description,
+            description_ar: product.description_ar,
+            price: product.price,
+            image_url: product.image_url,
+            is_active: product.is_active,
+            display_order: product.display_order
+          },
+          sessionToken
+        }
+      });
+
+      if (error || !data?.success) {
+        throw error || new Error(data?.error || 'Failed to update product');
+      }
 
       toast({
         title: "Success",
         description: "Product updated successfully"
       });
+
+      await fetchProducts();
     } catch (error) {
       console.error('Error updating product:', error);
       toast({
@@ -99,31 +115,40 @@ const AdminShop = () => {
 
   const handleAddProduct = async () => {
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) throw new Error('Not authenticated');
+
       const newOrder = products.length > 0 
         ? Math.max(...products.map(p => p.display_order)) + 1 
         : 1;
 
-      const { data, error } = await supabase
-        .from('products')
-        .insert({
-          name: 'New Product',
-          name_ar: 'منتج جديد',
-          description: 'Product description',
-          description_ar: 'وصف المنتج',
-          price: 0,
-          display_order: newOrder,
-          is_active: true
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.functions.invoke('products-manage', {
+        body: {
+          action: 'create',
+          data: {
+            name: 'New Product',
+            name_ar: 'منتج جديد',
+            description: 'Product description',
+            description_ar: 'وصف المنتج',
+            price: 0,
+            image_url: null,
+            display_order: newOrder,
+            is_active: true
+          },
+          sessionToken
+        }
+      });
 
-      if (error) throw error;
+      if (error || !data?.success) {
+        throw error || new Error(data?.error || 'Failed to add product');
+      }
 
-      setProducts([...products, data]);
       toast({
         title: "Success",
         description: "New product added"
       });
+
+      await fetchProducts();
     } catch (error) {
       console.error('Error adding product:', error);
       toast({
@@ -138,18 +163,23 @@ const AdminShop = () => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (!sessionToken) throw new Error('Not authenticated');
 
-      if (error) throw error;
+      const { data, error } = await supabase.functions.invoke('products-manage', {
+        body: { action: 'delete', id, sessionToken }
+      });
 
-      setProducts(products.filter(p => p.id !== id));
+      if (error || !data?.success) {
+        throw error || new Error(data?.error || 'Failed to delete product');
+      }
+
       toast({
         title: "Success",
         description: "Product deleted"
       });
+
+      await fetchProducts();
     } catch (error) {
       console.error('Error deleting product:', error);
       toast({
